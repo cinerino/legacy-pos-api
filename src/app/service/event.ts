@@ -31,21 +31,8 @@ export interface ISearchConditions4pos {
     performanceId?: string;
 }
 
-const cinerinoAuthClient = new cinerinoapi.auth.ClientCredentials({
-    domain: <string>process.env.CINERINO_AUTHORIZE_SERVER_DOMAIN,
-    clientId: <string>process.env.CINERINO_CLIENT_ID,
-    clientSecret: <string>process.env.CINERINO_CLIENT_SECRET,
-    scopes: [],
-    state: ''
-});
-
-const eventService = new cinerinoapi.service.Event({
-    endpoint: <string>process.env.CINERINO_API_ENDPOINT,
-    auth: cinerinoAuthClient
-});
-
-export function searchByChevre(params: ISearchConditions4pos) {
-    return async (): Promise<IEvent4pos[]> => {
+export function searchByChevre(params: ISearchConditions4pos, clientId: string) {
+    return async (eventService: cinerinoapi.service.Event): Promise<IEvent4pos[]> => {
         let events: cinerinoapi.factory.chevre.event.screeningEvent.IEvent[];
 
         // performanceId指定の場合はこちら
@@ -92,7 +79,7 @@ export function searchByChevre(params: ISearchConditions4pos) {
                 id: <string>firstEvent.offers?.seller?.id
             },
             store: {
-                id: <string>process.env.CINERINO_CLIENT_ID
+                id: clientId
             }
         });
 

@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Changed
 
+- イベント検索時に認証済のクライアントとしてオファーを検索するように変更
+
 ### Deprecated
 
 ### Removed

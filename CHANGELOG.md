@@ -8,8 +8,6 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Added
 
-- ttts-apiから全サービスを移行
-
 ### Changed
 
 ### Deprecated
@@ -19,3 +17,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 ### Fixed
 
 ### Security
+
+## v1.0.0 - 2020-08-16
+
+### Added
+
+- ttts-apiから全サービスを移行

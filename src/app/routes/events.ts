@@ -1,5 +1,5 @@
 /**
- * パフォーマンスルーター
+ * イベントルーター
  */
 import * as express from 'express';
 
@@ -8,19 +8,19 @@ import permitScopes from '../middlewares/permitScopes';
 import rateLimit from '../middlewares/rateLimit';
 import validator from '../middlewares/validator';
 
-import { searchByChevre } from '../service/performance';
+import { searchByChevre } from '../service/event';
 
-const performanceRouter = express.Router();
+const eventsRouter = express.Router();
 
-performanceRouter.use(authentication);
-performanceRouter.use(rateLimit);
+eventsRouter.use(authentication);
+eventsRouter.use(rateLimit);
 
 /**
- * パフォーマンス検索
+ * イベント検索
  */
-performanceRouter.get(
+eventsRouter.get(
     '',
-    permitScopes(['transactions', 'pos']),
+    permitScopes(['pos']),
     ...[],
     validator,
     async (req, res, next) => {
@@ -34,4 +34,4 @@ performanceRouter.get(
     }
 );
 
-export default performanceRouter;
+export default eventsRouter;

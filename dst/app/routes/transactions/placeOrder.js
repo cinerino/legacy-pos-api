@@ -20,7 +20,6 @@ const http_status_1 = require("http-status");
 const moment = require("moment-timezone");
 const redis = require("redis");
 const request = require("request-promise-native");
-const project = { typeOf: 'Project', id: process.env.PROJECT_ID };
 const auth = new cinerinoapi.auth.ClientCredentials({
     domain: '',
     clientId: '',
@@ -59,12 +58,12 @@ placeOrderTransactionsRouter.post('/start', permitScopes_1.default(['pos']), ...
         const placeOrderService = new cinerinoapi.service.transaction.PlaceOrder({
             auth: auth,
             endpoint: process.env.CINERINO_API_ENDPOINT,
-            project: { id: project.id }
+            project: { id: req.project.id }
         });
         const sellerService = new cinerinoapi.service.Seller({
             auth: auth,
             endpoint: process.env.CINERINO_API_ENDPOINT,
-            project: { id: project.id }
+            project: { id: req.project.id }
         });
         const searchSellersResult = yield sellerService.search({
             limit: 1
@@ -75,7 +74,7 @@ placeOrderTransactionsRouter.post('/start', permitScopes_1.default(['pos']), ...
         }
         // WAITER許可証を取得
         const scope = 'placeOrderTransaction.TokyoTower.POS';
-        const { token } = yield request.post(`${process.env.WAITER_ENDPOINT}/projects/${process.env.PROJECT_ID}/passports`, {
+        const { token } = yield request.post(`${process.env.WAITER_ENDPOINT}/projects/${req.project.id}/passports`, {
             json: true,
             body: { scope: scope }
         })
@@ -126,7 +125,7 @@ placeOrderTransactionsRouter.put('/:transactionId/customerContact', permitScopes
         const placeOrderService = new cinerinoapi.service.transaction.PlaceOrder({
             auth: auth,
             endpoint: process.env.CINERINO_API_ENDPOINT,
-            project: { id: project.id }
+            project: { id: req.project.id }
         });
         const profile = Object.assign(Object.assign({}, req.body), { id: req.user.sub, givenName: (typeof req.body.first_name === 'string') ? req.body.first_name : '', familyName: (typeof req.body.last_name === 'string') ? req.body.last_name : '', telephone: (typeof req.body.tel === 'string') ? req.body.tel : '', telephoneRegion: (typeof req.body.address === 'string') ? req.body.address : '' });
         yield placeOrderService.setProfile({
@@ -150,16 +149,15 @@ placeOrderTransactionsRouter.post('/:transactionId/actions/authorize/seatReserva
         if (!Array.isArray(req.body.offers)) {
             req.body.offers = [];
         }
-        const performanceId = req.body.performance_id;
         auth.setCredentials({ access_token: req.accessToken });
         const placeOrderService = new cinerinoapi.service.transaction.PlaceOrder4ttts({
             auth: auth,
             endpoint: process.env.CINERINO_API_ENDPOINT,
-            project: { id: project.id }
+            project: { id: req.project.id }
         });
         const action = yield placeOrderService.createSeatReservationAuthorization({
             transactionId: req.params.transactionId,
-            performanceId: performanceId,
+            performanceId: req.body.performance_id,
             offers: req.body.offers
         });
         const actionResult = action.result;
@@ -198,7 +196,7 @@ placeOrderTransactionsRouter.delete('/:transactionId/actions/authorize/seatReser
         const placeOrderService = new cinerinoapi.service.transaction.PlaceOrder({
             auth: auth,
             endpoint: process.env.CINERINO_API_ENDPOINT,
-            project: { id: project.id }
+            project: { id: req.project.id }
         });
         yield placeOrderService.voidSeatReservation({
             id: req.params.actionId,
@@ -234,7 +232,7 @@ placeOrderTransactionsRouter.post('/:transactionId/confirm', permitScopes_1.defa
         const paymentService = new cinerinoapi.service.Payment({
             auth: auth,
             endpoint: process.env.CINERINO_API_ENDPOINT,
-            project: { id: project.id }
+            project: { id: req.project.id }
         });
         // 金額取得
         const amountKey = `${TRANSACTION_AMOUNT_KEY_PREFIX}${req.params.transactionId}`;
@@ -260,7 +258,7 @@ placeOrderTransactionsRouter.post('/:transactionId/confirm', permitScopes_1.defa
         const placeOrderService = new cinerinoapi.service.transaction.PlaceOrder({
             auth: auth,
             endpoint: process.env.CINERINO_API_ENDPOINT,
-            project: { id: project.id }
+            project: { id: req.project.id }
         });
         const transactionResult = yield placeOrderService.confirm({
             id: req.params.transactionId

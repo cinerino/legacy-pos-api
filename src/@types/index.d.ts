@@ -5,19 +5,7 @@ import * as cinerinoapi from '@cinerino/sdk';
 
 declare global {
     namespace Express {
-        export interface IUser {
-            sub: string;
-            token_use: string;
-            scope: string;
-            scopes: string[];
-            iss: string;
-            exp: number;
-            iat: number;
-            version: number;
-            jti: string;
-            client_id: string;
-            username?: string;
-        }
+        export type IUser = cinerinoapi.factory.clientUser.IClientUser;
 
         // tslint:disable-next-line:interface-name
         export interface Request {

@@ -9,10 +9,7 @@ import * as helmet from 'helmet';
 import errorHandler from './middlewares/errorHandler';
 import notFoundHandler from './middlewares/notFoundHandler';
 
-import healthRouter from './routes/health';
-import performanceRouter from './routes/performances';
-import placeOrderTransactionsRouter from './routes/transactions/placeOrder';
-import returnOrderTransactionsRouter from './routes/transactions/returnOrder';
+import router from './routes/router';
 
 const app = express();
 
@@ -59,10 +56,7 @@ app.use(bodyParser.json({ limit: '50mb' }));
 app.use(bodyParser.urlencoded({ extended: true, limit: '50mb' }));
 
 // ルーティング
-app.use('/health', healthRouter);
-app.use('/performances', performanceRouter);
-app.use('/transactions/placeOrder', placeOrderTransactionsRouter);
-app.use('/transactions/returnOrder', returnOrderTransactionsRouter);
+app.use('/', router);
 
 // 404
 app.use(notFoundHandler);

@@ -8,10 +8,7 @@ const express = require("express");
 const helmet = require("helmet");
 const errorHandler_1 = require("./middlewares/errorHandler");
 const notFoundHandler_1 = require("./middlewares/notFoundHandler");
-const health_1 = require("./routes/health");
-const performances_1 = require("./routes/performances");
-const placeOrder_1 = require("./routes/transactions/placeOrder");
-const returnOrder_1 = require("./routes/transactions/returnOrder");
+const router_1 = require("./routes/router");
 const app = express();
 const options = {
     origin: '*',
@@ -51,10 +48,7 @@ app.use(bodyParser.json({ limit: '50mb' }));
 // with the querystring library (when false) or the qs library (when true).
 app.use(bodyParser.urlencoded({ extended: true, limit: '50mb' }));
 // ルーティング
-app.use('/health', health_1.default);
-app.use('/performances', performances_1.default);
-app.use('/transactions/placeOrder', placeOrder_1.default);
-app.use('/transactions/returnOrder', returnOrder_1.default);
+app.use('/', router_1.default);
 // 404
 app.use(notFoundHandler_1.default);
 // error handlers

@@ -18,8 +18,6 @@
 | `CINERINO_CLIENT_ID`               | true     |                           | Chevre API Settings            |
 | `CINERINO_CLIENT_SECRET`           | true     |                           | Chevre API Settings            |
 | `DEBUG`                            | false    | cinerino-legacy-pos-api:* | Debug                          |
-| `NODE_ENV`                         | true     |                           | environment name               |
-| `MONGOLAB_URI`                     | true     |                           | MongoDB connection URI         |
 | `PROJECT_ID`                       | true     |                           | Project ID                     |
 | `REDIS_HOST`                       | true     |                           | redis host                     |
 | `REDIS_PORT`                       | true     |                           | redis port                     |

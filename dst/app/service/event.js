@@ -10,21 +10,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.searchByChevre = void 0;
-/**
- * パフォーマンスルーター
- */
 const cinerinoapi = require("@cinerino/sdk");
 const moment = require("moment-timezone");
-const setting = {
-    offerCodes: [
-        '001',
-        '002',
-        '003',
-        '004',
-        '005',
-        '006'
-    ]
-};
 const cinerinoAuthClient = new cinerinoapi.auth.ClientCredentials({
     domain: process.env.CINERINO_AUTHORIZE_SERVER_DOMAIN,
     clientId: process.env.CINERINO_CLIENT_ID,
@@ -77,29 +64,28 @@ function searchByChevre(params) {
                 id: process.env.CINERINO_CLIENT_ID
             }
         });
-        const unitPriceOffers = offers
-            // 指定のオファーコードに限定する
-            .filter((o) => setting.offerCodes.includes(o.identifier))
-            .map((o) => {
+        const unitPriceOffers = offers.map((o) => {
             // tslint:disable-next-line:max-line-length
             const unitPriceSpec = o.priceSpecification.priceComponent.find((p) => p.typeOf === cinerinoapi.factory.chevre.priceSpecificationType.UnitPriceSpecification);
             return Object.assign(Object.assign({}, o), { priceSpecification: unitPriceSpec });
         });
         return events
             .map((event) => {
-            return event2performance4pos({ event, unitPriceOffers });
+            return event2event4pos({ event, unitPriceOffers });
         });
     });
 }
 exports.searchByChevre = searchByChevre;
-function event2performance4pos(params) {
+function event2event4pos(params) {
     var _a, _b, _c, _d, _e, _f, _g, _h;
     const event = params.event;
     const unitPriceOffers = params.unitPriceOffers;
+    const normalOffer = unitPriceOffers.find((o) => { var _a, _b; return ((_b = (_a = o.additionalProperty) === null || _a === void 0 ? void 0 : _a.find((p) => p.name === 'category')) === null || _b === void 0 ? void 0 : _b.value) === 'Normal'; });
+    const wheelchairOffer = unitPriceOffers.find((o) => { var _a, _b; return ((_b = (_a = o.additionalProperty) === null || _a === void 0 ? void 0 : _a.find((p) => p.name === 'category')) === null || _b === void 0 ? void 0 : _b.value) === 'Wheelchair'; });
     // 一般座席の残席数
-    const seatStatus = (_c = (_b = (_a = event.aggregateOffer) === null || _a === void 0 ? void 0 : _a.offers) === null || _b === void 0 ? void 0 : _b.find((o) => o.identifier === '001')) === null || _c === void 0 ? void 0 : _c.remainingAttendeeCapacity;
+    const seatStatus = (_c = (_b = (_a = event.aggregateOffer) === null || _a === void 0 ? void 0 : _a.offers) === null || _b === void 0 ? void 0 : _b.find((o) => o.id === (normalOffer === null || normalOffer === void 0 ? void 0 : normalOffer.id))) === null || _c === void 0 ? void 0 : _c.remainingAttendeeCapacity;
     // 車椅子座席の残席数
-    const wheelchairAvailable = (_f = (_e = (_d = event.aggregateOffer) === null || _d === void 0 ? void 0 : _d.offers) === null || _e === void 0 ? void 0 : _e.find((o) => o.identifier === '004')) === null || _f === void 0 ? void 0 : _f.remainingAttendeeCapacity;
+    const wheelchairAvailable = (_f = (_e = (_d = event.aggregateOffer) === null || _d === void 0 ? void 0 : _d.offers) === null || _e === void 0 ? void 0 : _e.find((o) => o.id === (wheelchairOffer === null || wheelchairOffer === void 0 ? void 0 : wheelchairOffer.id))) === null || _f === void 0 ? void 0 : _f.remainingAttendeeCapacity;
     const tourNumber = (_h = (_g = event.additionalProperty) === null || _g === void 0 ? void 0 : _g.find((p) => p.name === 'tourNumber')) === null || _h === void 0 ? void 0 : _h.value;
     return {
         id: event.id,
@@ -123,7 +109,10 @@ function event2performance4pos(params) {
                 var _a, _b, _c, _d;
                 const availableNum = (_c = (_b = (_a = event.aggregateOffer) === null || _a === void 0 ? void 0 : _a.offers) === null || _b === void 0 ? void 0 : _b.find((o) => o.id === unitPriceOffer.id)) === null || _c === void 0 ? void 0 : _c.remainingAttendeeCapacity;
                 return {
-                    name: unitPriceOffer.name,
+                    name: {
+                        en: unitPriceOffer.name.en,
+                        ja: unitPriceOffer.name.ja
+                    },
                     id: String(unitPriceOffer.identifier),
                     charge: (_d = unitPriceOffer.priceSpecification) === null || _d === void 0 ? void 0 : _d.price,
                     available_num: availableNum

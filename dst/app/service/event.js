@@ -12,19 +12,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.searchByChevre = void 0;
 const cinerinoapi = require("@cinerino/sdk");
 const moment = require("moment-timezone");
-const cinerinoAuthClient = new cinerinoapi.auth.ClientCredentials({
-    domain: process.env.CINERINO_AUTHORIZE_SERVER_DOMAIN,
-    clientId: process.env.CINERINO_CLIENT_ID,
-    clientSecret: process.env.CINERINO_CLIENT_SECRET,
-    scopes: [],
-    state: ''
-});
-const eventService = new cinerinoapi.service.Event({
-    endpoint: process.env.CINERINO_API_ENDPOINT,
-    auth: cinerinoAuthClient
-});
-function searchByChevre(params) {
-    return () => __awaiter(this, void 0, void 0, function* () {
+function searchByChevre(params, clientId) {
+    return (eventService) => __awaiter(this, void 0, void 0, function* () {
         var _a, _b, _c, _d;
         let events;
         // performanceId指定の場合はこちら
@@ -61,7 +50,7 @@ function searchByChevre(params) {
                 id: (_d = (_c = firstEvent.offers) === null || _c === void 0 ? void 0 : _c.seller) === null || _d === void 0 ? void 0 : _d.id
             },
             store: {
-                id: process.env.CINERINO_CLIENT_ID
+                id: clientId
             }
         });
         const unitPriceOffers = offers.map((o) => {

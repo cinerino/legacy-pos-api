@@ -10,9 +10,6 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Changed
 
-- chevreからインポートするオファーコード設定を削除
-- オファーコード設定を静的に保持しないように調整
-
 ### Deprecated
 
 ### Removed
@@ -20,6 +17,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 ### Fixed
 
 ### Security
+
+## v1.1.0 - 2020-08-16
+
+### Changed
+
+- chevreからインポートするオファーコード設定を削除
+- オファーコード設定を静的に保持しないように調整
 
 ## v1.0.0 - 2020-08-16
 

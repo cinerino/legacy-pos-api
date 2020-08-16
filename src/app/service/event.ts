@@ -1,21 +1,7 @@
-/**
- * パフォーマンスルーター
- */
 import * as cinerinoapi from '@cinerino/sdk';
 import * as moment from 'moment-timezone';
 
-const setting = {
-    offerCodes: [
-        '001',
-        '002',
-        '003',
-        '004',
-        '005',
-        '006'
-    ]
-};
-
-export interface IPerformance4pos {
+export interface IEvent4pos {
     id: string;
     attributes: {
         day: string;
@@ -59,7 +45,7 @@ const eventService = new cinerinoapi.service.Event({
 });
 
 export function searchByChevre(params: ISearchConditions4pos) {
-    return async (): Promise<IPerformance4pos[]> => {
+    return async (): Promise<IEvent4pos[]> => {
         let events: cinerinoapi.factory.chevre.event.screeningEvent.IEvent[];
 
         // performanceId指定の場合はこちら
@@ -110,40 +96,40 @@ export function searchByChevre(params: ISearchConditions4pos) {
             }
         });
 
-        const unitPriceOffers: cinerinoapi.factory.chevre.offer.IUnitPriceOffer[] = offers
-            // 指定のオファーコードに限定する
-            .filter((o) => setting.offerCodes.includes(o.identifier))
-            .map((o) => {
-                // tslint:disable-next-line:max-line-length
-                const unitPriceSpec = <cinerinoapi.factory.chevre.priceSpecification.IPriceSpecification<cinerinoapi.factory.chevre.priceSpecificationType.UnitPriceSpecification>>
-                    o.priceSpecification.priceComponent.find(
-                        (p) => p.typeOf === cinerinoapi.factory.chevre.priceSpecificationType.UnitPriceSpecification
-                    );
+        const unitPriceOffers: cinerinoapi.factory.chevre.offer.IUnitPriceOffer[] = offers.map((o) => {
+            // tslint:disable-next-line:max-line-length
+            const unitPriceSpec = <cinerinoapi.factory.chevre.priceSpecification.IPriceSpecification<cinerinoapi.factory.chevre.priceSpecificationType.UnitPriceSpecification>>
+                o.priceSpecification.priceComponent.find(
+                    (p) => p.typeOf === cinerinoapi.factory.chevre.priceSpecificationType.UnitPriceSpecification
+                );
 
-                return {
-                    ...o,
-                    priceSpecification: unitPriceSpec
-                };
-            });
+            return {
+                ...o,
+                priceSpecification: unitPriceSpec
+            };
+        });
 
         return events
             .map((event) => {
-                return event2performance4pos({ event, unitPriceOffers });
+                return event2event4pos({ event, unitPriceOffers });
             });
     };
 }
 
-function event2performance4pos(params: {
+function event2event4pos(params: {
     event: cinerinoapi.factory.chevre.event.screeningEvent.IEvent;
     unitPriceOffers: cinerinoapi.factory.chevre.offer.IUnitPriceOffer[];
-}): IPerformance4pos {
+}): IEvent4pos {
     const event = params.event;
     const unitPriceOffers = params.unitPriceOffers;
 
+    const normalOffer = unitPriceOffers.find((o) => o.additionalProperty?.find((p) => p.name === 'category')?.value === 'Normal');
+    const wheelchairOffer = unitPriceOffers.find((o) => o.additionalProperty?.find((p) => p.name === 'category')?.value === 'Wheelchair');
+
     // 一般座席の残席数
-    const seatStatus = event.aggregateOffer?.offers?.find((o) => o.identifier === '001')?.remainingAttendeeCapacity;
+    const seatStatus = event.aggregateOffer?.offers?.find((o) => o.id === normalOffer?.id)?.remainingAttendeeCapacity;
     // 車椅子座席の残席数
-    const wheelchairAvailable = event.aggregateOffer?.offers?.find((o) => o.identifier === '004')?.remainingAttendeeCapacity;
+    const wheelchairAvailable = event.aggregateOffer?.offers?.find((o) => o.id === wheelchairOffer?.id)?.remainingAttendeeCapacity;
 
     const tourNumber = event.additionalProperty?.find((p) => p.name === 'tourNumber')?.value;
 
@@ -170,7 +156,10 @@ function event2performance4pos(params: {
                     event.aggregateOffer?.offers?.find((o) => o.id === unitPriceOffer.id)?.remainingAttendeeCapacity;
 
                 return {
-                    name: <cinerinoapi.factory.chevre.multilingualString>unitPriceOffer.name,
+                    name: {
+                        en: (<cinerinoapi.factory.chevre.multilingualString>unitPriceOffer.name).en,
+                        ja: (<cinerinoapi.factory.chevre.multilingualString>unitPriceOffer.name).ja
+                    },
                     id: String(unitPriceOffer.identifier), // POSに受け渡すのは券種IDでなく券種コードなので要注意
                     charge: unitPriceOffer.priceSpecification?.price,
                     available_num: availableNum

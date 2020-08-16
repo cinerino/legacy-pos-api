@@ -10,8 +10,6 @@ import * as redis from 'redis';
 
 import { ORDERS_KEY_PREFIX } from './placeOrder';
 
-const project = { typeOf: <'Project'>'Project', id: <string>process.env.PROJECT_ID };
-
 const redisClient = redis.createClient({
     host: <string>process.env.REDIS_HOST,
     port: Number(<string>process.env.REDIS_PORT),
@@ -60,7 +58,7 @@ returnOrderTransactionsRouter.post(
             const returnOrderService = new cinerinoapi.service.transaction.ReturnOrder({
                 auth: auth,
                 endpoint: <string>process.env.CINERINO_API_ENDPOINT,
-                project: { id: project.id }
+                project: { id: req.project.id }
             });
 
             // 注文取得

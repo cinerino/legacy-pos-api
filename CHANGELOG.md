@@ -18,6 +18,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Security
 
+## v1.1.0 - 2020-08-16
+
+### Changed
+
+- chevreからインポートするオファーコード設定を削除
+- オファーコード設定を静的に保持しないように調整
+
 ## v1.0.0 - 2020-08-16
 
 ### Added

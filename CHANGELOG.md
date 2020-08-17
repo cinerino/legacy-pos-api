@@ -10,11 +10,6 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Changed
 
-- 全サービスをマルチプロジェクト対応
-- WAITER_SCOPEを環境変数化
-- オファーカテゴリーの設定に関係なくイベント残席数を取得できるように調整
-- 注文取引開始時に販売者を指定できるように調整
-
 ### Deprecated
 
 ### Removed
@@ -22,6 +17,15 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 ### Fixed
 
 ### Security
+
+## v1.3.0 - 2020-08-17
+
+### Changed
+
+- 全サービスをマルチプロジェクト対応
+- WAITER_SCOPEを環境変数化
+- オファーカテゴリーの設定に関係なくイベント残席数を取得できるように調整
+- 注文取引開始時に販売者を指定できるように調整
 
 ## v1.2.0 - 2020-08-16
 

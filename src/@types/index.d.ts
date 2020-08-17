@@ -13,6 +13,7 @@ declare global {
             agent: cinerinoapi.factory.person.IPerson;
             user: IUser;
             accessToken: string;
+            authClient?: cinerinoapi.auth.ClientCredentials;
         }
     }
 }

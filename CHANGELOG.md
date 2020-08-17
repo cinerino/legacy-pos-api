@@ -18,6 +18,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Security
 
+## v1.3.1 - 2020-08-17
+
+### Changed
+
+- リクエストに対するCinerino認証クライアントの設定を調整
+
 ## v1.3.0 - 2020-08-17
 
 ### Changed

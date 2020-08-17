@@ -10,14 +10,6 @@ import validator from '../middlewares/validator';
 
 import { searchByChevre } from '../service/event';
 
-const cinerinoAuthClient = new cinerinoapi.auth.ClientCredentials({
-    domain: '',
-    clientId: '',
-    clientSecret: '',
-    scopes: [],
-    state: ''
-});
-
 const eventsRouter = express.Router();
 
 eventsRouter.use(rateLimit);
@@ -32,11 +24,10 @@ eventsRouter.get(
     validator,
     async (req, res, next) => {
         try {
-            cinerinoAuthClient.setCredentials({ access_token: req.accessToken });
             const eventService = new cinerinoapi.service.Event({
                 endpoint: <string>process.env.CINERINO_API_ENDPOINT,
                 project: { id: req.project.id },
-                auth: cinerinoAuthClient
+                auth: req.authClient
             });
 
             const events = await searchByChevre(req.query, req.user.client_id)(eventService);

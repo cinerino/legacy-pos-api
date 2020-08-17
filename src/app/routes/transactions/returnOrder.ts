@@ -21,14 +21,6 @@ const redisClient = redis.createClient({
     tls: (process.env.REDIS_TLS_SERVERNAME !== undefined) ? { servername: process.env.REDIS_TLS_SERVERNAME } : undefined
 });
 
-const auth = new cinerinoapi.auth.ClientCredentials({
-    domain: '',
-    clientId: '',
-    clientSecret: '',
-    scopes: [],
-    state: ''
-});
-
 const returnOrderTransactionsRouter = Router();
 
 returnOrderTransactionsRouter.use(rateLimit);
@@ -52,9 +44,8 @@ returnOrderTransactionsRouter.post(
     validator,
     async (req, res, next) => {
         try {
-            auth.setCredentials({ access_token: req.accessToken });
             const returnOrderService = new cinerinoapi.service.transaction.ReturnOrder({
-                auth: auth,
+                auth: req.authClient,
                 endpoint: <string>process.env.CINERINO_API_ENDPOINT,
                 project: { id: req.project.id }
             });

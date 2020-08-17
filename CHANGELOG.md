@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Changed
 
+- リクエストに対するCinerino認証クライアントの設定を調整
+
 ### Deprecated
 
 ### Removed

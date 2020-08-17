@@ -23,13 +23,6 @@ const request = require("request-promise-native");
 const permitScopes_1 = require("../../middlewares/permitScopes");
 const rateLimit_1 = require("../../middlewares/rateLimit");
 const validator_1 = require("../../middlewares/validator");
-const auth = new cinerinoapi.auth.ClientCredentials({
-    domain: '',
-    clientId: '',
-    clientSecret: '',
-    scopes: [],
-    state: ''
-});
 const WAITER_SCOPE = process.env.WAITER_SCOPE;
 const TRANSACTION_TTL = 3600;
 const TRANSACTION_KEY_PREFIX = 'cinerino-legacy-pos-api:placeOrder:';
@@ -54,14 +47,13 @@ placeOrderTransactionsRouter.post('/start', permitScopes_1.default(['pos']), ...
 ], validator_1.default, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     try {
-        auth.setCredentials({ access_token: req.accessToken });
         const placeOrderService = new cinerinoapi.service.transaction.PlaceOrder({
-            auth: auth,
+            auth: req.authClient,
             endpoint: process.env.CINERINO_API_ENDPOINT,
             project: { id: req.project.id }
         });
         const sellerService = new cinerinoapi.service.Seller({
-            auth: auth,
+            auth: req.authClient,
             endpoint: process.env.CINERINO_API_ENDPOINT,
             project: { id: req.project.id }
         });
@@ -133,9 +125,8 @@ placeOrderTransactionsRouter.put('/:transactionId/customerContact', permitScopes
         .withMessage(() => 'required')
 ], validator_1.default, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        auth.setCredentials({ access_token: req.accessToken });
         const placeOrderService = new cinerinoapi.service.transaction.PlaceOrder({
-            auth: auth,
+            auth: req.authClient,
             endpoint: process.env.CINERINO_API_ENDPOINT,
             project: { id: req.project.id }
         });
@@ -161,9 +152,8 @@ placeOrderTransactionsRouter.post('/:transactionId/actions/authorize/seatReserva
         if (!Array.isArray(req.body.offers)) {
             req.body.offers = [];
         }
-        auth.setCredentials({ access_token: req.accessToken });
         const placeOrderService = new cinerinoapi.service.transaction.PlaceOrder4ttts({
-            auth: auth,
+            auth: req.authClient,
             endpoint: process.env.CINERINO_API_ENDPOINT,
             project: { id: req.project.id }
         });
@@ -204,9 +194,8 @@ placeOrderTransactionsRouter.post('/:transactionId/actions/authorize/seatReserva
  */
 placeOrderTransactionsRouter.delete('/:transactionId/actions/authorize/seatReservation/:actionId', permitScopes_1.default(['pos']), validator_1.default, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        auth.setCredentials({ access_token: req.accessToken });
         const placeOrderService = new cinerinoapi.service.transaction.PlaceOrder({
-            auth: auth,
+            auth: req.authClient,
             endpoint: process.env.CINERINO_API_ENDPOINT,
             project: { id: req.project.id }
         });
@@ -240,9 +229,8 @@ placeOrderTransactionsRouter.post('/:transactionId/confirm', permitScopes_1.defa
     var _b, _c;
     try {
         // クライアントがPOSの場合、決済方法承認アクションを自動生成
-        auth.setCredentials({ access_token: req.accessToken });
         const paymentService = new cinerinoapi.service.Payment({
-            auth: auth,
+            auth: req.authClient,
             endpoint: process.env.CINERINO_API_ENDPOINT,
             project: { id: req.project.id }
         });
@@ -268,7 +256,7 @@ placeOrderTransactionsRouter.post('/:transactionId/confirm', permitScopes_1.defa
             purpose: { typeOf: cinerinoapi.factory.transactionType.PlaceOrder, id: req.params.transactionId }
         });
         const placeOrderService = new cinerinoapi.service.transaction.PlaceOrder({
-            auth: auth,
+            auth: req.authClient,
             endpoint: process.env.CINERINO_API_ENDPOINT,
             project: { id: req.project.id }
         });

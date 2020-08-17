@@ -18,13 +18,6 @@ const permitScopes_1 = require("../middlewares/permitScopes");
 const rateLimit_1 = require("../middlewares/rateLimit");
 const validator_1 = require("../middlewares/validator");
 const event_1 = require("../service/event");
-const cinerinoAuthClient = new cinerinoapi.auth.ClientCredentials({
-    domain: '',
-    clientId: '',
-    clientSecret: '',
-    scopes: [],
-    state: ''
-});
 const eventsRouter = express.Router();
 eventsRouter.use(rateLimit_1.default);
 /**
@@ -32,11 +25,10 @@ eventsRouter.use(rateLimit_1.default);
  */
 eventsRouter.get('', permitScopes_1.default(['pos']), ...[], validator_1.default, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        cinerinoAuthClient.setCredentials({ access_token: req.accessToken });
         const eventService = new cinerinoapi.service.Event({
             endpoint: process.env.CINERINO_API_ENDPOINT,
             project: { id: req.project.id },
-            auth: cinerinoAuthClient
+            auth: req.authClient
         });
         const events = yield event_1.searchByChevre(req.query, req.user.client_id)(eventService);
         res.json({ data: events });

@@ -46,6 +46,17 @@ export default async (req: Request, res: Response, next: NextFunction) => {
                     identifier: identifier
                 };
 
+                // リクエストに対してCinerino認証クライアントをセット
+                const auth = new cinerinoapi.auth.ClientCredentials({
+                    domain: '',
+                    clientId: '',
+                    clientSecret: '',
+                    scopes: [],
+                    state: ''
+                });
+                auth.setCredentials({ access_token: req.accessToken });
+                req.authClient = auth;
+
                 next();
             },
             unauthorizedHandler: (err) => {

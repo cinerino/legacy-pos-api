@@ -8,6 +8,10 @@ import { CREATED } from 'http-status';
 import * as moment from 'moment';
 import * as redis from 'redis';
 
+import permitScopes from '../../middlewares/permitScopes';
+import rateLimit from '../../middlewares/rateLimit';
+import validator from '../../middlewares/validator';
+
 import { ORDERS_KEY_PREFIX } from './placeOrder';
 
 const redisClient = redis.createClient({
@@ -27,12 +31,6 @@ const auth = new cinerinoapi.auth.ClientCredentials({
 
 const returnOrderTransactionsRouter = Router();
 
-import authentication from '../../middlewares/authentication';
-import permitScopes from '../../middlewares/permitScopes';
-import rateLimit from '../../middlewares/rateLimit';
-import validator from '../../middlewares/validator';
-
-returnOrderTransactionsRouter.use(authentication);
 returnOrderTransactionsRouter.use(rateLimit);
 
 /**

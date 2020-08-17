@@ -11,6 +11,10 @@ import * as moment from 'moment-timezone';
 import * as redis from 'redis';
 import * as request from 'request-promise-native';
 
+import permitScopes from '../../middlewares/permitScopes';
+import rateLimit from '../../middlewares/rateLimit';
+import validator from '../../middlewares/validator';
+
 const auth = new cinerinoapi.auth.ClientCredentials({
     domain: '',
     clientId: '',
@@ -19,12 +23,7 @@ const auth = new cinerinoapi.auth.ClientCredentials({
     state: ''
 });
 
-const placeOrderTransactionsRouter = Router();
-
-import authentication from '../../middlewares/authentication';
-import permitScopes from '../../middlewares/permitScopes';
-import rateLimit from '../../middlewares/rateLimit';
-import validator from '../../middlewares/validator';
+const WAITER_SCOPE = process.env.WAITER_SCOPE;
 
 const TRANSACTION_TTL = 3600;
 const TRANSACTION_KEY_PREFIX = 'cinerino-legacy-pos-api:placeOrder:';
@@ -41,7 +40,8 @@ const redisClient = redis.createClient({
     tls: (process.env.REDIS_TLS_SERVERNAME !== undefined) ? { servername: process.env.REDIS_TLS_SERVERNAME } : undefined
 });
 
-placeOrderTransactionsRouter.use(authentication);
+const placeOrderTransactionsRouter = Router();
+
 placeOrderTransactionsRouter.use(rateLimit);
 
 placeOrderTransactionsRouter.post(
@@ -69,21 +69,27 @@ placeOrderTransactionsRouter.post(
                 project: { id: req.project.id }
             });
 
-            const searchSellersResult = await sellerService.search({
-                limit: 1
-            });
-            const seller = searchSellersResult.data.shift();
-            if (seller === undefined) {
-                throw new Error('Seller not found');
+            let seller: cinerinoapi.factory.seller.ISeller | undefined;
+
+            if (typeof req.body.seller?.id === 'string') {
+                seller = await sellerService.findById({ id: req.body.seller.id });
+            } else {
+                // 販売者の指定がなければ自動選択
+                const searchSellersResult = await sellerService.search({
+                    limit: 1
+                });
+                seller = searchSellersResult.data.shift();
+                if (seller === undefined) {
+                    throw new Error('Seller not found');
+                }
             }
 
             // WAITER許可証を取得
-            const scope = 'placeOrderTransaction.TokyoTower.POS';
             const { token } = await request.post(
                 `${process.env.WAITER_ENDPOINT}/projects/${req.project.id}/passports`,
                 {
                     json: true,
-                    body: { scope: scope }
+                    body: { scope: WAITER_SCOPE }
                 }
             )
                 .then((result) => result);
@@ -103,7 +109,13 @@ placeOrderTransactionsRouter.post(
             });
 
             res.status(CREATED)
-                .json(transaction);
+                .json({
+                    id: transaction.id,
+                    agent: transaction.agent,
+                    seller: transaction.seller,
+                    expires: transaction.expires,
+                    startDate: transaction.startDate
+                });
         } catch (error) {
             next(error);
         }

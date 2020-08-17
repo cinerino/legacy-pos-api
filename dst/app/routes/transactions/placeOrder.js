@@ -20,6 +20,9 @@ const http_status_1 = require("http-status");
 const moment = require("moment-timezone");
 const redis = require("redis");
 const request = require("request-promise-native");
+const permitScopes_1 = require("../../middlewares/permitScopes");
+const rateLimit_1 = require("../../middlewares/rateLimit");
+const validator_1 = require("../../middlewares/validator");
 const auth = new cinerinoapi.auth.ClientCredentials({
     domain: '',
     clientId: '',
@@ -27,11 +30,7 @@ const auth = new cinerinoapi.auth.ClientCredentials({
     scopes: [],
     state: ''
 });
-const placeOrderTransactionsRouter = express_1.Router();
-const authentication_1 = require("../../middlewares/authentication");
-const permitScopes_1 = require("../../middlewares/permitScopes");
-const rateLimit_1 = require("../../middlewares/rateLimit");
-const validator_1 = require("../../middlewares/validator");
+const WAITER_SCOPE = process.env.WAITER_SCOPE;
 const TRANSACTION_TTL = 3600;
 const TRANSACTION_KEY_PREFIX = 'cinerino-legacy-pos-api:placeOrder:';
 const TRANSACTION_AMOUNT_TTL = TRANSACTION_TTL;
@@ -44,7 +43,7 @@ const redisClient = redis.createClient({
     password: process.env.REDIS_KEY,
     tls: (process.env.REDIS_TLS_SERVERNAME !== undefined) ? { servername: process.env.REDIS_TLS_SERVERNAME } : undefined
 });
-placeOrderTransactionsRouter.use(authentication_1.default);
+const placeOrderTransactionsRouter = express_1.Router();
 placeOrderTransactionsRouter.use(rateLimit_1.default);
 placeOrderTransactionsRouter.post('/start', permitScopes_1.default(['pos']), ...[
     express_validator_1.body('expires')
@@ -53,6 +52,7 @@ placeOrderTransactionsRouter.post('/start', permitScopes_1.default(['pos']), ...
         .withMessage(() => 'required')
         .isISO8601()
 ], validator_1.default, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
     try {
         auth.setCredentials({ access_token: req.accessToken });
         const placeOrderService = new cinerinoapi.service.transaction.PlaceOrder({
@@ -65,18 +65,24 @@ placeOrderTransactionsRouter.post('/start', permitScopes_1.default(['pos']), ...
             endpoint: process.env.CINERINO_API_ENDPOINT,
             project: { id: req.project.id }
         });
-        const searchSellersResult = yield sellerService.search({
-            limit: 1
-        });
-        const seller = searchSellersResult.data.shift();
-        if (seller === undefined) {
-            throw new Error('Seller not found');
+        let seller;
+        if (typeof ((_a = req.body.seller) === null || _a === void 0 ? void 0 : _a.id) === 'string') {
+            seller = yield sellerService.findById({ id: req.body.seller.id });
+        }
+        else {
+            // 販売者の指定がなければ自動選択
+            const searchSellersResult = yield sellerService.search({
+                limit: 1
+            });
+            seller = searchSellersResult.data.shift();
+            if (seller === undefined) {
+                throw new Error('Seller not found');
+            }
         }
         // WAITER許可証を取得
-        const scope = 'placeOrderTransaction.TokyoTower.POS';
         const { token } = yield request.post(`${process.env.WAITER_ENDPOINT}/projects/${req.project.id}/passports`, {
             json: true,
-            body: { scope: scope }
+            body: { scope: WAITER_SCOPE }
         })
             .then((result) => result);
         const expires = moment(req.body.expires)
@@ -92,7 +98,13 @@ placeOrderTransactionsRouter.post('/start', permitScopes_1.default(['pos']), ...
             }
         });
         res.status(http_status_1.CREATED)
-            .json(transaction);
+            .json({
+            id: transaction.id,
+            agent: transaction.agent,
+            seller: transaction.seller,
+            expires: transaction.expires,
+            startDate: transaction.startDate
+        });
     }
     catch (error) {
         next(error);
@@ -225,7 +237,7 @@ placeOrderTransactionsRouter.delete('/:transactionId/actions/authorize/seatReser
     }
 }));
 placeOrderTransactionsRouter.post('/:transactionId/confirm', permitScopes_1.default(['pos']), validator_1.default, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a, _b;
+    var _b, _c;
     try {
         // クライアントがPOSの場合、決済方法承認アクションを自動生成
         auth.setCredentials({ access_token: req.accessToken });
@@ -263,7 +275,7 @@ placeOrderTransactionsRouter.post('/:transactionId/confirm', permitScopes_1.defa
         const transactionResult = yield placeOrderService.confirm({
             id: req.params.transactionId
         });
-        const confirmationNumber = (_b = (_a = transactionResult.order.identifier) === null || _a === void 0 ? void 0 : _a.find((p) => p.name === 'confirmationNumber')) === null || _b === void 0 ? void 0 : _b.value;
+        const confirmationNumber = (_c = (_b = transactionResult.order.identifier) === null || _b === void 0 ? void 0 : _b.find((p) => p.name === 'confirmationNumber')) === null || _c === void 0 ? void 0 : _c.value;
         if (confirmationNumber === undefined) {
             throw new cinerinoapi.factory.errors.ServiceUnavailable('confirmationNumber not found');
         }

@@ -69,12 +69,19 @@ placeOrderTransactionsRouter.post(
                 project: { id: req.project.id }
             });
 
-            const searchSellersResult = await sellerService.search({
-                limit: 1
-            });
-            const seller = searchSellersResult.data.shift();
-            if (seller === undefined) {
-                throw new Error('Seller not found');
+            let seller: cinerinoapi.factory.seller.ISeller | undefined;
+
+            if (typeof req.body.seller?.id === 'string') {
+                seller = await sellerService.findById({ id: req.body.seller.id });
+            } else {
+                // 販売者の指定がなければ自動選択
+                const searchSellersResult = await sellerService.search({
+                    limit: 1
+                });
+                seller = searchSellersResult.data.shift();
+                if (seller === undefined) {
+                    throw new Error('Seller not found');
+                }
             }
 
             // WAITER許可証を取得
@@ -102,7 +109,13 @@ placeOrderTransactionsRouter.post(
             });
 
             res.status(CREATED)
-                .json(transaction);
+                .json({
+                    id: transaction.id,
+                    agent: transaction.agent,
+                    seller: transaction.seller,
+                    expires: transaction.expires,
+                    startDate: transaction.startDate
+                });
         } catch (error) {
             next(error);
         }

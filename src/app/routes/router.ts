@@ -3,10 +3,11 @@
  */
 import * as express from 'express';
 
-import eventsRouter from './events';
 import healthRouter from './health';
-import placeOrderTransactionsRouter from './transactions/placeOrder';
-import returnOrderTransactionsRouter from './transactions/returnOrder';
+import projectDetailRouter from './projects/detail';
+
+import authentication from '../middlewares/authentication';
+import setProject from '../middlewares/setProject';
 
 const router = express.Router();
 
@@ -16,9 +17,17 @@ const router = express.Router();
 //   next()
 // })
 
+// 例外的なpublic router
 router.use('/health', healthRouter);
-router.use('/performances', eventsRouter);
-router.use('/transactions/placeOrder', placeOrderTransactionsRouter);
-router.use('/transactions/returnOrder', returnOrderTransactionsRouter);
+
+// 認証
+router.use(authentication);
+
+// リクエストプロジェクト設定
+router.use(setProject);
+
+// 以下、プロジェクト指定済の状態でルーティング
+router.use('', projectDetailRouter);
+router.use('/projects/:id', projectDetailRouter);
 
 export default router;

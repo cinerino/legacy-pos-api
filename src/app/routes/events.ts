@@ -4,7 +4,6 @@
 import * as cinerinoapi from '@cinerino/sdk';
 import * as express from 'express';
 
-import authentication from '../middlewares/authentication';
 import permitScopes from '../middlewares/permitScopes';
 import rateLimit from '../middlewares/rateLimit';
 import validator from '../middlewares/validator';
@@ -21,7 +20,6 @@ const cinerinoAuthClient = new cinerinoapi.auth.ClientCredentials({
 
 const eventsRouter = express.Router();
 
-eventsRouter.use(authentication);
 eventsRouter.use(rateLimit);
 
 /**

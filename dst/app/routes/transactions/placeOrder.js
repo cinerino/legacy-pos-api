@@ -20,6 +20,9 @@ const http_status_1 = require("http-status");
 const moment = require("moment-timezone");
 const redis = require("redis");
 const request = require("request-promise-native");
+const permitScopes_1 = require("../../middlewares/permitScopes");
+const rateLimit_1 = require("../../middlewares/rateLimit");
+const validator_1 = require("../../middlewares/validator");
 const auth = new cinerinoapi.auth.ClientCredentials({
     domain: '',
     clientId: '',
@@ -27,11 +30,6 @@ const auth = new cinerinoapi.auth.ClientCredentials({
     scopes: [],
     state: ''
 });
-const placeOrderTransactionsRouter = express_1.Router();
-const authentication_1 = require("../../middlewares/authentication");
-const permitScopes_1 = require("../../middlewares/permitScopes");
-const rateLimit_1 = require("../../middlewares/rateLimit");
-const validator_1 = require("../../middlewares/validator");
 const TRANSACTION_TTL = 3600;
 const TRANSACTION_KEY_PREFIX = 'cinerino-legacy-pos-api:placeOrder:';
 const TRANSACTION_AMOUNT_TTL = TRANSACTION_TTL;
@@ -44,7 +42,7 @@ const redisClient = redis.createClient({
     password: process.env.REDIS_KEY,
     tls: (process.env.REDIS_TLS_SERVERNAME !== undefined) ? { servername: process.env.REDIS_TLS_SERVERNAME } : undefined
 });
-placeOrderTransactionsRouter.use(authentication_1.default);
+const placeOrderTransactionsRouter = express_1.Router();
 placeOrderTransactionsRouter.use(rateLimit_1.default);
 placeOrderTransactionsRouter.post('/start', permitScopes_1.default(['pos']), ...[
     express_validator_1.body('expires')

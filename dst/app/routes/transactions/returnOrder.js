@@ -18,6 +18,9 @@ const express_validator_1 = require("express-validator");
 const http_status_1 = require("http-status");
 const moment = require("moment");
 const redis = require("redis");
+const permitScopes_1 = require("../../middlewares/permitScopes");
+const rateLimit_1 = require("../../middlewares/rateLimit");
+const validator_1 = require("../../middlewares/validator");
 const placeOrder_1 = require("./placeOrder");
 const redisClient = redis.createClient({
     host: process.env.REDIS_HOST,
@@ -33,11 +36,6 @@ const auth = new cinerinoapi.auth.ClientCredentials({
     state: ''
 });
 const returnOrderTransactionsRouter = express_1.Router();
-const authentication_1 = require("../../middlewares/authentication");
-const permitScopes_1 = require("../../middlewares/permitScopes");
-const rateLimit_1 = require("../../middlewares/rateLimit");
-const validator_1 = require("../../middlewares/validator");
-returnOrderTransactionsRouter.use(authentication_1.default);
 returnOrderTransactionsRouter.use(rateLimit_1.default);
 /**
  * 上映日と購入番号で返品

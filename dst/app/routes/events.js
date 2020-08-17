@@ -14,7 +14,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
  */
 const cinerinoapi = require("@cinerino/sdk");
 const express = require("express");
-const authentication_1 = require("../middlewares/authentication");
 const permitScopes_1 = require("../middlewares/permitScopes");
 const rateLimit_1 = require("../middlewares/rateLimit");
 const validator_1 = require("../middlewares/validator");
@@ -27,7 +26,6 @@ const cinerinoAuthClient = new cinerinoapi.auth.ClientCredentials({
     state: ''
 });
 const eventsRouter = express.Router();
-eventsRouter.use(authentication_1.default);
 eventsRouter.use(rateLimit_1.default);
 /**
  * イベント検索

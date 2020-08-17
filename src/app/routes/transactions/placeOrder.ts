@@ -11,6 +11,10 @@ import * as moment from 'moment-timezone';
 import * as redis from 'redis';
 import * as request from 'request-promise-native';
 
+import permitScopes from '../../middlewares/permitScopes';
+import rateLimit from '../../middlewares/rateLimit';
+import validator from '../../middlewares/validator';
+
 const auth = new cinerinoapi.auth.ClientCredentials({
     domain: '',
     clientId: '',
@@ -18,13 +22,6 @@ const auth = new cinerinoapi.auth.ClientCredentials({
     scopes: [],
     state: ''
 });
-
-const placeOrderTransactionsRouter = Router();
-
-import authentication from '../../middlewares/authentication';
-import permitScopes from '../../middlewares/permitScopes';
-import rateLimit from '../../middlewares/rateLimit';
-import validator from '../../middlewares/validator';
 
 const TRANSACTION_TTL = 3600;
 const TRANSACTION_KEY_PREFIX = 'cinerino-legacy-pos-api:placeOrder:';
@@ -41,7 +38,8 @@ const redisClient = redis.createClient({
     tls: (process.env.REDIS_TLS_SERVERNAME !== undefined) ? { servername: process.env.REDIS_TLS_SERVERNAME } : undefined
 });
 
-placeOrderTransactionsRouter.use(authentication);
+const placeOrderTransactionsRouter = Router();
+
 placeOrderTransactionsRouter.use(rateLimit);
 
 placeOrderTransactionsRouter.post(

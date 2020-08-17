@@ -23,6 +23,8 @@ const auth = new cinerinoapi.auth.ClientCredentials({
     state: ''
 });
 
+const WAITER_SCOPE = process.env.WAITER_SCOPE;
+
 const TRANSACTION_TTL = 3600;
 const TRANSACTION_KEY_PREFIX = 'cinerino-legacy-pos-api:placeOrder:';
 const TRANSACTION_AMOUNT_TTL = TRANSACTION_TTL;
@@ -76,12 +78,11 @@ placeOrderTransactionsRouter.post(
             }
 
             // WAITER許可証を取得
-            const scope = 'placeOrderTransaction.TokyoTower.POS';
             const { token } = await request.post(
                 `${process.env.WAITER_ENDPOINT}/projects/${req.project.id}/passports`,
                 {
                     json: true,
-                    body: { scope: scope }
+                    body: { scope: WAITER_SCOPE }
                 }
             )
                 .then((result) => result);

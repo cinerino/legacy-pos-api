@@ -11,6 +11,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 ### Changed
 
 - 全サービスをマルチプロジェクト対応
+- WAITER_SCOPEを環境変数化
 
 ### Deprecated
 

@@ -22,6 +22,7 @@
 | `RESOURECE_SERVER_IDENTIFIER` | true     |                           | Resource Server Identifier     |
 | `TOKEN_ISSUERS`               | true     |                           | Token issuers(Comma separated) |
 | `WAITER_ENDPOINT`             | true     |                           | Waiter endpoint                |
+| `WAITER_SCOPE`                | true     |                           | Waiter scope                   |
 
 ## License
 

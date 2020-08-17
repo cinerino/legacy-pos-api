@@ -18,6 +18,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Security
 
+## v1.3.2 - 2020-08-17
+
+### Changed
+
+- request -> node-fetch
+- 不要なパッケージを削除
+
 ## v1.3.1 - 2020-08-17
 
 ### Changed

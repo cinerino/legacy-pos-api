@@ -18,8 +18,8 @@ const express_1 = require("express");
 const express_validator_1 = require("express-validator");
 const http_status_1 = require("http-status");
 const moment = require("moment-timezone");
+const node_fetch_1 = require("node-fetch");
 const redis = require("redis");
-const request = require("request-promise-native");
 const permitScopes_1 = require("../../middlewares/permitScopes");
 const rateLimit_1 = require("../../middlewares/rateLimit");
 const validator_1 = require("../../middlewares/validator");
@@ -36,6 +36,28 @@ const redisClient = redis.createClient({
     password: process.env.REDIS_KEY,
     tls: (process.env.REDIS_TLS_SERVERNAME !== undefined) ? { servername: process.env.REDIS_TLS_SERVERNAME } : undefined
 });
+function publishWaiterScope(params) {
+    return __awaiter(this, void 0, void 0, function* () {
+        // WAITER許可証を取得
+        const response = yield node_fetch_1.default(`${process.env.WAITER_ENDPOINT}/projects/${params.project.id}/passports`, {
+            method: 'POST',
+            body: JSON.stringify({ scope: WAITER_SCOPE }),
+            headers: { 'Content-Type': 'application/json' }
+        });
+        if (!response.ok) {
+            let message = 'Waiter unavailable';
+            try {
+                message = JSON.stringify(yield response.json());
+            }
+            catch (error) {
+                // no op
+            }
+            throw new cinerinoapi.factory.errors.ServiceUnavailable(message);
+        }
+        const { token } = yield response.json();
+        return token;
+    });
+}
 const placeOrderTransactionsRouter = express_1.Router();
 placeOrderTransactionsRouter.use(rateLimit_1.default);
 placeOrderTransactionsRouter.post('/start', permitScopes_1.default(['pos']), ...[
@@ -72,11 +94,7 @@ placeOrderTransactionsRouter.post('/start', permitScopes_1.default(['pos']), ...
             }
         }
         // WAITER許可証を取得
-        const { token } = yield request.post(`${process.env.WAITER_ENDPOINT}/projects/${req.project.id}/passports`, {
-            json: true,
-            body: { scope: WAITER_SCOPE }
-        })
-            .then((result) => result);
+        const token = yield publishWaiterScope({ project: { id: req.project.id } });
         const expires = moment(req.body.expires)
             .toDate();
         const transaction = yield placeOrderService.start({

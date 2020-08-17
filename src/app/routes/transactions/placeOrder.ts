@@ -8,8 +8,8 @@ import { ParamsDictionary } from 'express-serve-static-core';
 import { body } from 'express-validator';
 import { CREATED, NO_CONTENT } from 'http-status';
 import * as moment from 'moment-timezone';
+import fetch from 'node-fetch';
 import * as redis from 'redis';
-import * as request from 'request-promise-native';
 
 import permitScopes from '../../middlewares/permitScopes';
 import rateLimit from '../../middlewares/rateLimit';
@@ -31,6 +31,30 @@ const redisClient = redis.createClient({
     password: <string>process.env.REDIS_KEY,
     tls: (process.env.REDIS_TLS_SERVERNAME !== undefined) ? { servername: process.env.REDIS_TLS_SERVERNAME } : undefined
 });
+
+async function publishWaiterScope(params: { project: { id: string } }): Promise<string> {
+    // WAITER許可証を取得
+    const response = await fetch(
+        `${process.env.WAITER_ENDPOINT}/projects/${params.project.id}/passports`,
+        {
+            method: 'POST',
+            body: JSON.stringify({ scope: WAITER_SCOPE }),
+            headers: { 'Content-Type': 'application/json' }
+        }
+    );
+    if (!response.ok) {
+        let message = 'Waiter unavailable';
+        try {
+            message = JSON.stringify(await response.json());
+        } catch (error) {
+            // no op
+        }
+        throw new cinerinoapi.factory.errors.ServiceUnavailable(message);
+    }
+    const { token } = await response.json();
+
+    return token;
+}
 
 const placeOrderTransactionsRouter = Router();
 
@@ -76,14 +100,7 @@ placeOrderTransactionsRouter.post(
             }
 
             // WAITER許可証を取得
-            const { token } = await request.post(
-                `${process.env.WAITER_ENDPOINT}/projects/${req.project.id}/passports`,
-                {
-                    json: true,
-                    body: { scope: WAITER_SCOPE }
-                }
-            )
-                .then((result) => result);
+            const token = await publishWaiterScope({ project: { id: req.project.id } });
 
             const expires = moment(req.body.expires)
                 .toDate();

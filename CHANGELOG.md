@@ -10,6 +10,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Changed
 
+- request -> node-fetch
+- 不要なパッケージを削除
+
 ### Deprecated
 
 ### Removed

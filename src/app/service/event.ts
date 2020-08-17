@@ -1,6 +1,16 @@
 import * as cinerinoapi from '@cinerino/sdk';
 import * as moment from 'moment-timezone';
 
+export interface ITicketType {
+    charge?: number;
+    name: {
+        en?: string;
+        ja?: string;
+    };
+    id?: string;
+    available_num?: number;
+}
+
 export interface IEvent4pos {
     id: string;
     attributes: {
@@ -11,15 +21,7 @@ export interface IEvent4pos {
         seat_status?: string;
         tour_number?: string;
         wheelchair_available?: number;
-        ticket_types: {
-            charge?: number;
-            name: {
-                en?: string;
-                ja?: string;
-            };
-            id?: string;
-            available_num?: number;
-        }[];
+        ticket_types: ITicketType[];
         online_sales_status: string;
     };
 }
@@ -110,11 +112,19 @@ function event2event4pos(params: {
     const event = params.event;
     const unitPriceOffers = params.unitPriceOffers;
 
+    // デフォルトはイベントのremainingAttendeeCapacity
+    let seatStatus = event.remainingAttendeeCapacity;
+
     const normalOffer = unitPriceOffers.find((o) => o.additionalProperty?.find((p) => p.name === 'category')?.value === 'Normal');
     const wheelchairOffer = unitPriceOffers.find((o) => o.additionalProperty?.find((p) => p.name === 'category')?.value === 'Wheelchair');
 
     // 一般座席の残席数
-    const seatStatus = event.aggregateOffer?.offers?.find((o) => o.id === normalOffer?.id)?.remainingAttendeeCapacity;
+    const normalOfferRemainingAttendeeCapacity =
+        event.aggregateOffer?.offers?.find((o) => o.id === normalOffer?.id)?.remainingAttendeeCapacity;
+    if (typeof normalOfferRemainingAttendeeCapacity === 'number') {
+        seatStatus = normalOfferRemainingAttendeeCapacity;
+    }
+
     // 車椅子座席の残席数
     const wheelchairAvailable = event.aggregateOffer?.offers?.find((o) => o.id === wheelchairOffer?.id)?.remainingAttendeeCapacity;
 
@@ -135,9 +145,6 @@ function event2event4pos(params: {
             end_time: moment(event.endDate)
                 .tz('Asia/Tokyo')
                 .format('HHmm'),
-            seat_status: (typeof seatStatus === 'number') ? String(seatStatus) : undefined,
-            wheelchair_available: wheelchairAvailable,
-            tour_number: tourNumber,
             ticket_types: unitPriceOffers.map((unitPriceOffer) => {
                 const availableNum =
                     event.aggregateOffer?.offers?.find((o) => o.id === unitPriceOffer.id)?.remainingAttendeeCapacity;
@@ -154,7 +161,10 @@ function event2event4pos(params: {
             }),
             online_sales_status: (event.eventStatus === cinerinoapi.factory.chevre.eventStatusType.EventScheduled)
                 ? 'Normal'
-                : 'Suspended'
+                : 'Suspended',
+            ...(typeof seatStatus === 'number') ? { seat_status: String(seatStatus) } : undefined,
+            ...(typeof wheelchairAvailable === 'number') ? { wheelchair_available: wheelchairAvailable } : undefined,
+            ...(typeof tourNumber === 'string') ? { tour_number: tourNumber } : undefined
         }
     };
 }

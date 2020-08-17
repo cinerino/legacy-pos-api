@@ -69,32 +69,29 @@ function event2event4pos(params) {
     var _a, _b, _c, _d, _e, _f, _g, _h;
     const event = params.event;
     const unitPriceOffers = params.unitPriceOffers;
+    // デフォルトはイベントのremainingAttendeeCapacity
+    let seatStatus = event.remainingAttendeeCapacity;
     const normalOffer = unitPriceOffers.find((o) => { var _a, _b; return ((_b = (_a = o.additionalProperty) === null || _a === void 0 ? void 0 : _a.find((p) => p.name === 'category')) === null || _b === void 0 ? void 0 : _b.value) === 'Normal'; });
     const wheelchairOffer = unitPriceOffers.find((o) => { var _a, _b; return ((_b = (_a = o.additionalProperty) === null || _a === void 0 ? void 0 : _a.find((p) => p.name === 'category')) === null || _b === void 0 ? void 0 : _b.value) === 'Wheelchair'; });
     // 一般座席の残席数
-    const seatStatus = (_c = (_b = (_a = event.aggregateOffer) === null || _a === void 0 ? void 0 : _a.offers) === null || _b === void 0 ? void 0 : _b.find((o) => o.id === (normalOffer === null || normalOffer === void 0 ? void 0 : normalOffer.id))) === null || _c === void 0 ? void 0 : _c.remainingAttendeeCapacity;
+    const normalOfferRemainingAttendeeCapacity = (_c = (_b = (_a = event.aggregateOffer) === null || _a === void 0 ? void 0 : _a.offers) === null || _b === void 0 ? void 0 : _b.find((o) => o.id === (normalOffer === null || normalOffer === void 0 ? void 0 : normalOffer.id))) === null || _c === void 0 ? void 0 : _c.remainingAttendeeCapacity;
+    if (typeof normalOfferRemainingAttendeeCapacity === 'number') {
+        seatStatus = normalOfferRemainingAttendeeCapacity;
+    }
     // 車椅子座席の残席数
     const wheelchairAvailable = (_f = (_e = (_d = event.aggregateOffer) === null || _d === void 0 ? void 0 : _d.offers) === null || _e === void 0 ? void 0 : _e.find((o) => o.id === (wheelchairOffer === null || wheelchairOffer === void 0 ? void 0 : wheelchairOffer.id))) === null || _f === void 0 ? void 0 : _f.remainingAttendeeCapacity;
     const tourNumber = (_h = (_g = event.additionalProperty) === null || _g === void 0 ? void 0 : _g.find((p) => p.name === 'tourNumber')) === null || _h === void 0 ? void 0 : _h.value;
     return {
         id: event.id,
-        attributes: {
-            day: moment(event.startDate)
+        attributes: Object.assign(Object.assign(Object.assign({ day: moment(event.startDate)
                 .tz('Asia/Tokyo')
-                .format('YYYYMMDD'),
-            open_time: moment(event.startDate)
+                .format('YYYYMMDD'), open_time: moment(event.startDate)
                 .tz('Asia/Tokyo')
-                .format('HHmm'),
-            start_time: moment(event.startDate)
+                .format('HHmm'), start_time: moment(event.startDate)
                 .tz('Asia/Tokyo')
-                .format('HHmm'),
-            end_time: moment(event.endDate)
+                .format('HHmm'), end_time: moment(event.endDate)
                 .tz('Asia/Tokyo')
-                .format('HHmm'),
-            seat_status: (typeof seatStatus === 'number') ? String(seatStatus) : undefined,
-            wheelchair_available: wheelchairAvailable,
-            tour_number: tourNumber,
-            ticket_types: unitPriceOffers.map((unitPriceOffer) => {
+                .format('HHmm'), ticket_types: unitPriceOffers.map((unitPriceOffer) => {
                 var _a, _b, _c, _d;
                 const availableNum = (_c = (_b = (_a = event.aggregateOffer) === null || _a === void 0 ? void 0 : _a.offers) === null || _b === void 0 ? void 0 : _b.find((o) => o.id === unitPriceOffer.id)) === null || _c === void 0 ? void 0 : _c.remainingAttendeeCapacity;
                 return {
@@ -106,10 +103,8 @@ function event2event4pos(params) {
                     charge: (_d = unitPriceOffer.priceSpecification) === null || _d === void 0 ? void 0 : _d.price,
                     available_num: availableNum
                 };
-            }),
-            online_sales_status: (event.eventStatus === cinerinoapi.factory.chevre.eventStatusType.EventScheduled)
+            }), online_sales_status: (event.eventStatus === cinerinoapi.factory.chevre.eventStatusType.EventScheduled)
                 ? 'Normal'
-                : 'Suspended'
-        }
+                : 'Suspended' }, (typeof seatStatus === 'number') ? { seat_status: String(seatStatus) } : undefined), (typeof wheelchairAvailable === 'number') ? { wheelchair_available: wheelchairAvailable } : undefined), (typeof tourNumber === 'string') ? { tour_number: tourNumber } : undefined)
     };
 }

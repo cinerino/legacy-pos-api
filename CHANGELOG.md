@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 - 全サービスをマルチプロジェクト対応
 - WAITER_SCOPEを環境変数化
+- オファーカテゴリーの設定に関係なくイベント残席数を取得できるように調整
 
 ### Deprecated
 

@@ -18,6 +18,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Security
 
+## v1.4.0 - 2020-08-18
+
+### Added
+
+- EXCLUDE_TICKET_TYPES_IN_EVENTS設定を追加
+
 ## v1.3.2 - 2020-08-17
 
 ### Changed

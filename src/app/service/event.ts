@@ -1,6 +1,8 @@
 import * as cinerinoapi from '@cinerino/sdk';
 import * as moment from 'moment-timezone';
 
+const EXCLUDE_TICKET_TYPES_IN_EVENTS = process.env.EXCLUDE_TICKET_TYPES_IN_EVENTS === '1';
+
 export interface ITicketType {
     charge?: number;
     name: {
@@ -21,7 +23,7 @@ export interface IEvent4pos {
         seat_status?: string;
         tour_number?: string;
         wheelchair_available?: number;
-        ticket_types: ITicketType[];
+        ticket_types?: ITicketType[];
         online_sales_status: string;
     };
 }
@@ -37,10 +39,13 @@ export function searchByChevre(params: ISearchConditions4pos, clientId: string) 
     return async (eventService: cinerinoapi.service.Event): Promise<IEvent4pos[]> => {
         let events: cinerinoapi.factory.chevre.event.screeningEvent.IEvent[];
 
+        let excludeTicketTypes = EXCLUDE_TICKET_TYPES_IN_EVENTS;
+
         // performanceId指定の場合はこちら
         if (typeof params.performanceId === 'string') {
             const event = await eventService.findById<cinerinoapi.factory.chevre.eventType.ScreeningEvent>({ id: params.performanceId });
             events = [event];
+            excludeTicketTypes = false;
         } else {
             const searchConditions: cinerinoapi.factory.chevre.event.screeningEvent.ISearchConditions = {
                 // tslint:disable-next-line:no-magic-numbers
@@ -100,7 +105,7 @@ export function searchByChevre(params: ISearchConditions4pos, clientId: string) 
 
         return events
             .map((event) => {
-                return event2event4pos({ event, unitPriceOffers });
+                return event2event4pos({ event, unitPriceOffers, excludeTicketTypes });
             });
     };
 }
@@ -108,6 +113,7 @@ export function searchByChevre(params: ISearchConditions4pos, clientId: string) 
 function event2event4pos(params: {
     event: cinerinoapi.factory.chevre.event.screeningEvent.IEvent;
     unitPriceOffers: cinerinoapi.factory.chevre.offer.IUnitPriceOffer[];
+    excludeTicketTypes: boolean;
 }): IEvent4pos {
     const event = params.event;
     const unitPriceOffers = params.unitPriceOffers;
@@ -145,23 +151,27 @@ function event2event4pos(params: {
             end_time: moment(event.endDate)
                 .tz('Asia/Tokyo')
                 .format('HHmm'),
-            ticket_types: unitPriceOffers.map((unitPriceOffer) => {
-                const availableNum =
-                    event.aggregateOffer?.offers?.find((o) => o.id === unitPriceOffer.id)?.remainingAttendeeCapacity;
-
-                return {
-                    name: {
-                        en: (<cinerinoapi.factory.chevre.multilingualString>unitPriceOffer.name).en,
-                        ja: (<cinerinoapi.factory.chevre.multilingualString>unitPriceOffer.name).ja
-                    },
-                    id: String(unitPriceOffer.identifier), // POSに受け渡すのは券種IDでなく券種コードなので要注意
-                    charge: unitPriceOffer.priceSpecification?.price,
-                    available_num: availableNum
-                };
-            }),
             online_sales_status: (event.eventStatus === cinerinoapi.factory.chevre.eventStatusType.EventScheduled)
                 ? 'Normal'
                 : 'Suspended',
+            ...(params.excludeTicketTypes)
+                ? undefined
+                : {
+                    ticket_types: unitPriceOffers.map((unitPriceOffer) => {
+                        const availableNum =
+                            event.aggregateOffer?.offers?.find((o) => o.id === unitPriceOffer.id)?.remainingAttendeeCapacity;
+
+                        return {
+                            name: {
+                                en: (<cinerinoapi.factory.chevre.multilingualString>unitPriceOffer.name).en,
+                                ja: (<cinerinoapi.factory.chevre.multilingualString>unitPriceOffer.name).ja
+                            },
+                            id: String(unitPriceOffer.identifier), // POSに受け渡すのは券種IDでなく券種コードなので要注意
+                            charge: unitPriceOffer.priceSpecification?.price,
+                            available_num: availableNum
+                        };
+                    })
+                },
             ...(typeof seatStatus === 'number') ? { seat_status: String(seatStatus) } : undefined,
             ...(typeof wheelchairAvailable === 'number') ? { wheelchair_available: wheelchairAvailable } : undefined,
             ...(typeof tourNumber === 'string') ? { tour_number: tourNumber } : undefined

@@ -12,14 +12,17 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.searchByChevre = void 0;
 const cinerinoapi = require("@cinerino/sdk");
 const moment = require("moment-timezone");
+const EXCLUDE_TICKET_TYPES_IN_EVENTS = process.env.EXCLUDE_TICKET_TYPES_IN_EVENTS === '1';
 function searchByChevre(params, clientId) {
     return (eventService) => __awaiter(this, void 0, void 0, function* () {
         var _a, _b, _c, _d;
         let events;
+        let excludeTicketTypes = EXCLUDE_TICKET_TYPES_IN_EVENTS;
         // performanceId指定の場合はこちら
         if (typeof params.performanceId === 'string') {
             const event = yield eventService.findById({ id: params.performanceId });
             events = [event];
+            excludeTicketTypes = false;
         }
         else {
             const searchConditions = Object.assign(Object.assign({ 
@@ -60,7 +63,7 @@ function searchByChevre(params, clientId) {
         });
         return events
             .map((event) => {
-            return event2event4pos({ event, unitPriceOffers });
+            return event2event4pos({ event, unitPriceOffers, excludeTicketTypes });
         });
     });
 }
@@ -83,7 +86,7 @@ function event2event4pos(params) {
     const tourNumber = (_h = (_g = event.additionalProperty) === null || _g === void 0 ? void 0 : _g.find((p) => p.name === 'tourNumber')) === null || _h === void 0 ? void 0 : _h.value;
     return {
         id: event.id,
-        attributes: Object.assign(Object.assign(Object.assign({ day: moment(event.startDate)
+        attributes: Object.assign(Object.assign(Object.assign(Object.assign({ day: moment(event.startDate)
                 .tz('Asia/Tokyo')
                 .format('YYYYMMDD'), open_time: moment(event.startDate)
                 .tz('Asia/Tokyo')
@@ -91,20 +94,24 @@ function event2event4pos(params) {
                 .tz('Asia/Tokyo')
                 .format('HHmm'), end_time: moment(event.endDate)
                 .tz('Asia/Tokyo')
-                .format('HHmm'), ticket_types: unitPriceOffers.map((unitPriceOffer) => {
-                var _a, _b, _c, _d;
-                const availableNum = (_c = (_b = (_a = event.aggregateOffer) === null || _a === void 0 ? void 0 : _a.offers) === null || _b === void 0 ? void 0 : _b.find((o) => o.id === unitPriceOffer.id)) === null || _c === void 0 ? void 0 : _c.remainingAttendeeCapacity;
-                return {
-                    name: {
-                        en: unitPriceOffer.name.en,
-                        ja: unitPriceOffer.name.ja
-                    },
-                    id: String(unitPriceOffer.identifier),
-                    charge: (_d = unitPriceOffer.priceSpecification) === null || _d === void 0 ? void 0 : _d.price,
-                    available_num: availableNum
-                };
-            }), online_sales_status: (event.eventStatus === cinerinoapi.factory.chevre.eventStatusType.EventScheduled)
+                .format('HHmm'), online_sales_status: (event.eventStatus === cinerinoapi.factory.chevre.eventStatusType.EventScheduled)
                 ? 'Normal'
-                : 'Suspended' }, (typeof seatStatus === 'number') ? { seat_status: String(seatStatus) } : undefined), (typeof wheelchairAvailable === 'number') ? { wheelchair_available: wheelchairAvailable } : undefined), (typeof tourNumber === 'string') ? { tour_number: tourNumber } : undefined)
+                : 'Suspended' }, (params.excludeTicketTypes)
+            ? undefined
+            : {
+                ticket_types: unitPriceOffers.map((unitPriceOffer) => {
+                    var _a, _b, _c, _d;
+                    const availableNum = (_c = (_b = (_a = event.aggregateOffer) === null || _a === void 0 ? void 0 : _a.offers) === null || _b === void 0 ? void 0 : _b.find((o) => o.id === unitPriceOffer.id)) === null || _c === void 0 ? void 0 : _c.remainingAttendeeCapacity;
+                    return {
+                        name: {
+                            en: unitPriceOffer.name.en,
+                            ja: unitPriceOffer.name.ja
+                        },
+                        id: String(unitPriceOffer.identifier),
+                        charge: (_d = unitPriceOffer.priceSpecification) === null || _d === void 0 ? void 0 : _d.price,
+                        available_num: availableNum
+                    };
+                })
+            }), (typeof seatStatus === 'number') ? { seat_status: String(seatStatus) } : undefined), (typeof wheelchairAvailable === 'number') ? { wheelchair_available: wheelchairAvailable } : undefined), (typeof tourNumber === 'string') ? { tour_number: tourNumber } : undefined)
     };
 }

@@ -18,6 +18,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Security
 
+## v1.5.0 - 2020-08-21
+
+### Added
+
+- USE_PROJECTLESS_ROUTER設定を追加
+
 ## v1.4.0 - 2020-08-18
 
 ### Added

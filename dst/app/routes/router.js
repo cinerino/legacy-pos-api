@@ -8,6 +8,7 @@ const health_1 = require("./health");
 const detail_1 = require("./projects/detail");
 const authentication_1 = require("../middlewares/authentication");
 const setProject_1 = require("../middlewares/setProject");
+const USE_PROJECTLESS_ROUTER = process.env.USE_PROJECTLESS_ROUTER === '1';
 const router = express.Router();
 // middleware that is specific to this router
 // router.use((req, res, next) => {
@@ -21,6 +22,8 @@ router.use(authentication_1.default);
 // リクエストプロジェクト設定
 router.use(setProject_1.default);
 // 以下、プロジェクト指定済の状態でルーティング
-router.use('', detail_1.default);
+if (USE_PROJECTLESS_ROUTER) {
+    router.use('', detail_1.default);
+}
 router.use('/projects/:id', detail_1.default);
 exports.default = router;

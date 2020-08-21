@@ -21,6 +21,7 @@
 | `REDIS_KEY`                   | true     |                           | redis key                      |
 | `RESOURECE_SERVER_IDENTIFIER` | true     |                           | Resource Server Identifier     |
 | `TOKEN_ISSUERS`               | true     |                           | Token issuers(Comma separated) |
+| `USE_PROJECTLESS_ROUTER`      | true     |                           | Projectless router use flag    |
 | `WAITER_ENDPOINT`             | true     |                           | Waiter endpoint                |
 | `WAITER_SCOPE`                | true     |                           | Waiter scope                   |
 

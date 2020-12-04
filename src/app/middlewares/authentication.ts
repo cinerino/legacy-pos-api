@@ -41,7 +41,7 @@ export default async (req: Request, res: Response, next: NextFunction) => {
                 req.user = user;
                 req.accessToken = token;
                 req.agent = {
-                    typeOf: <any>cinerinoapi.factory.creativeWorkType.WebApplication,
+                    typeOf: <any>cinerinoapi.factory.chevre.creativeWorkType.WebApplication,
                     id: user.sub,
                     identifier: identifier
                 };

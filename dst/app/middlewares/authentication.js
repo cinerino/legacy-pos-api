@@ -46,7 +46,7 @@ exports.default = (req, res, next) => __awaiter(void 0, void 0, void 0, function
                 req.user = user;
                 req.accessToken = token;
                 req.agent = {
-                    typeOf: cinerinoapi.factory.creativeWorkType.WebApplication,
+                    typeOf: cinerinoapi.factory.chevre.creativeWorkType.WebApplication,
                     id: user.sub,
                     identifier: identifier
                 };

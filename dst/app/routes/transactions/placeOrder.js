@@ -266,8 +266,9 @@ placeOrderTransactionsRouter.post('/:transactionId/confirm', permitScopes_1.defa
         });
         yield paymentService.authorizeAnyPayment({
             object: {
-                typeOf: cinerinoapi.factory.paymentMethodType.Cash,
-                name: cinerinoapi.factory.paymentMethodType.Cash,
+                typeOf: cinerinoapi.factory.action.authorize.paymentMethod.any.ResultType.Payment,
+                paymentMethod: cinerinoapi.factory.chevre.paymentMethodType.Cash,
+                name: cinerinoapi.factory.chevre.paymentMethodType.Cash,
                 additionalProperty: [],
                 amount: amount
             },

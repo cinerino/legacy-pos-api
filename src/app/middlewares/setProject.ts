@@ -8,7 +8,7 @@ const setProject = express.Router();
 
 setProject.use((req, _, next) => {
     // デフォルトプロジェクトはPROJECT_ID
-    req.project = { typeOf: cinerinoapi.factory.organizationType.Project, id: <string>process.env.PROJECT_ID };
+    req.project = { typeOf: cinerinoapi.factory.chevre.organizationType.Project, id: <string>process.env.PROJECT_ID };
 
     next();
 });
@@ -17,7 +17,7 @@ setProject.use((req, _, next) => {
 setProject.use(
     '/projects/:id',
     (req, _, next) => {
-        req.project = { typeOf: cinerinoapi.factory.organizationType.Project, id: req.params.id };
+        req.project = { typeOf: cinerinoapi.factory.chevre.organizationType.Project, id: req.params.id };
 
         next();
     }

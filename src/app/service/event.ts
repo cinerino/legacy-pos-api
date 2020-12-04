@@ -82,7 +82,7 @@ export function searchByChevre(params: ISearchConditions4pos, clientId: string) 
         const offers = await eventService.searchTicketOffers({
             event: { id: firstEvent.id },
             seller: {
-                typeOf: <cinerinoapi.factory.organizationType>firstEvent.offers?.seller?.typeOf,
+                typeOf: <cinerinoapi.factory.chevre.organizationType>firstEvent.offers?.seller?.typeOf,
                 id: <string>firstEvent.offers?.seller?.id
             },
             store: {

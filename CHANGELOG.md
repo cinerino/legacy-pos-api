@@ -18,6 +18,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Security
 
+## v1.6.0 - 2020-12-31
+
+### Changed
+
+- USE_ORDER_CODE設定を追加
+
 ## v1.5.1 - 2020-12-04
 
 ### Changed

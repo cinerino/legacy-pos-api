@@ -23,6 +23,8 @@ const redis = require("redis");
 const permitScopes_1 = require("../../middlewares/permitScopes");
 const rateLimit_1 = require("../../middlewares/rateLimit");
 const validator_1 = require("../../middlewares/validator");
+const USE_ORDER_CODE = process.env.USE_ORDER_CODE === '1';
+const CODE_EXPIRES_IN_SECONDS = 8035200; // 93日
 const WAITER_SCOPE = process.env.WAITER_SCOPE;
 const TRANSACTION_TTL = 3600;
 const TRANSACTION_KEY_PREFIX = 'cinerino-legacy-pos-api:placeOrder:';
@@ -301,14 +303,22 @@ placeOrderTransactionsRouter.post('/:transactionId/confirm', permitScopes_1.defa
                 }
             });
         });
+        let code;
+        if (USE_ORDER_CODE) {
+            code = yield publishCode(req, transactionResult.order, req.params.transactionId);
+        }
         res.status(http_status_1.CREATED)
             .json({
             // POSへのレスポンスとしてeventReservations属性を生成
             eventReservations: transactionResult.order.acceptedOffers
                 .map((o) => {
                 const r = o.itemOffered;
+                let qrStr = r.id;
+                if (typeof code === 'string' && code.length > 0) {
+                    qrStr += `@${code}`;
+                }
                 return {
-                    qr_str: r.id,
+                    qr_str: qrStr,
                     payment_no: transactionResult.order.confirmationNumber,
                     performance: r.reservationFor.id
                 };
@@ -320,3 +330,48 @@ placeOrderTransactionsRouter.post('/:transactionId/confirm', permitScopes_1.defa
     }
 }));
 exports.default = placeOrderTransactionsRouter;
+function publishCode(req, order, transactionId) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const orderService = new cinerinoapi.service.Order({
+            auth: req.authClient,
+            endpoint: process.env.CINERINO_API_ENDPOINT,
+            project: { id: req.project.id }
+        });
+        try {
+            // まず注文作成(非同期処理が間に合わない可能性ありなので)
+            yield orderService.placeOrder({
+                object: {
+                    orderNumber: order.orderNumber,
+                    confirmationNumber: order.confirmationNumber
+                },
+                purpose: {
+                    typeOf: cinerinoapi.factory.transactionType.PlaceOrder,
+                    id: transactionId
+                }
+            });
+        }
+        catch (error) {
+            // tslint:disable-next-line:no-console
+            console.error(error);
+        }
+        // 注文承認
+        let code;
+        try {
+            const authorizeOrderResult = yield orderService.authorize({
+                object: {
+                    orderNumber: order.orderNumber,
+                    customer: { telephone: order.customer.telephone }
+                },
+                result: {
+                    expiresInSeconds: CODE_EXPIRES_IN_SECONDS
+                }
+            });
+            code = authorizeOrderResult.code;
+        }
+        catch (error) {
+            // tslint:disable-next-line:no-console
+            console.error(error);
+        }
+        return code;
+    });
+}

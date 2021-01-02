@@ -5,6 +5,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
  */
 const express = require("express");
 const health_1 = require("./health");
+const preview_1 = require("./preview");
 const detail_1 = require("./projects/detail");
 const authentication_1 = require("../middlewares/authentication");
 const setProject_1 = require("../middlewares/setProject");
@@ -17,6 +18,7 @@ const router = express.Router();
 // })
 // 例外的なpublic router
 router.use('/health', health_1.default);
+router.use('/preview', preview_1.default);
 // 認証
 router.use(authentication_1.default);
 // リクエストプロジェクト設定

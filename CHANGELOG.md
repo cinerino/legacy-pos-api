@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Added
 
+- サイネージ専用のイベント検索サービスを追加
+
 ### Changed
 
 ### Deprecated

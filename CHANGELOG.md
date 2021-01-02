@@ -8,8 +8,6 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Added
 
-- サイネージ専用のイベント検索サービスを追加
-
 ### Changed
 
 ### Deprecated
@@ -19,6 +17,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 ### Fixed
 
 ### Security
+
+## v1.7.0 - 2021-01-02
+
+### Added
+
+- サイネージ専用のイベント検索サービスを追加
 
 ## v1.6.0 - 2020-12-31
 

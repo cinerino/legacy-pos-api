@@ -4,6 +4,7 @@
 import * as express from 'express';
 
 import healthRouter from './health';
+import previewRouter from './preview';
 import projectDetailRouter from './projects/detail';
 
 import authentication from '../middlewares/authentication';
@@ -21,6 +22,7 @@ const router = express.Router();
 
 // 例外的なpublic router
 router.use('/health', healthRouter);
+router.use('/preview', previewRouter);
 
 // 認証
 router.use(authentication);

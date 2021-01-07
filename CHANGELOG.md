@@ -10,6 +10,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Changed
 
+- PROJECT_ID設定を削除
+- USE_PROJECTLESS_ROUTERを削除
+
 ### Deprecated
 
 ### Removed

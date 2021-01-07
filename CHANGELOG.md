@@ -18,6 +18,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Security
 
+## v1.8.0 - 2021-01-07
+
+### Changed
+
+- PROJECT_ID設定を削除
+- USE_PROJECTLESS_ROUTERを削除
+
 ## v1.7.0 - 2021-01-02
 
 ### Added

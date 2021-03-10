@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 ### Added
 
 - 新しいイベント検索を追加
+- USE_PREVIEW_ROUTER設定を追加
 
 ### Changed
 

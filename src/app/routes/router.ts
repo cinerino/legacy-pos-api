@@ -4,13 +4,10 @@
 import * as express from 'express';
 
 import healthRouter from './health';
-import previewRouter from './preview';
 import projectDetailRouter from './projects/detail';
 
 import authentication from '../middlewares/authentication';
 import setProject from '../middlewares/setProject';
-
-const USE_PREVIEW_ROUTER = process.env.USE_PREVIEW_ROUTER === '1';
 
 const router = express.Router();
 
@@ -22,9 +19,6 @@ const router = express.Router();
 
 // 例外的なpublic router
 router.use('/health', healthRouter);
-if (USE_PREVIEW_ROUTER) {
-    router.use('/preview', previewRouter);
-}
 
 // 認証
 router.use(authentication);

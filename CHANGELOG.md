@@ -18,6 +18,16 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Security
 
+## v1.9.0 - 2021-03-11
+
+### Added
+
+- 新しいイベント検索を追加
+
+### Removed
+
+- previewルーターを削除
+
 ## v1.8.0 - 2021-01-07
 
 ### Changed

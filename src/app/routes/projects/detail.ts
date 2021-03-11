@@ -5,6 +5,7 @@ import * as cinerinoapi from '@cinerino/sdk';
 import * as express from 'express';
 
 import eventsRouter from '../events';
+import performancesRouter from '../performances';
 import placeOrderTransactionsRouter from '../transactions/placeOrder';
 import returnOrderTransactionsRouter from '../transactions/returnOrder';
 
@@ -21,7 +22,8 @@ projectDetailRouter.use((req, _, next) => {
     next();
 });
 
-projectDetailRouter.use('/performances', eventsRouter);
+projectDetailRouter.use('/events', eventsRouter);
+projectDetailRouter.use('/performances', performancesRouter);
 projectDetailRouter.use('/transactions/placeOrder', placeOrderTransactionsRouter);
 projectDetailRouter.use('/transactions/returnOrder', returnOrderTransactionsRouter);
 

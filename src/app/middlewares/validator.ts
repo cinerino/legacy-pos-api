@@ -14,7 +14,7 @@ export default async (req: Request, __: Response, next: NextFunction) => {
     if (!validatorResult.isEmpty()) {
         const errors = validatorResult.array()
             .map((mappedRrror) => {
-                return new cinerinoapi.factory.errors.Argument(mappedRrror.param, mappedRrror.msg);
+                return new cinerinoapi.transporters.RequestError(`${mappedRrror.param} ${mappedRrror.msg}`);
             });
 
         next(new APIError(BAD_REQUEST, errors));

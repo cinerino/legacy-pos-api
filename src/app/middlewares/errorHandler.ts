@@ -35,12 +35,11 @@ export default (err: any, __: Request, res: Response, next: NextFunction) => {
         // エラー配列が入ってくることもある
         if (Array.isArray(err)) {
             apiError = new APIError(cinerinoError2httpStatusCode(err[0]), err);
-        } else if (err instanceof cinerinoapi.factory.errors.Cinerino) {
+        } else if (err instanceof cinerinoapi.transporters.RequestError) {
             apiError = new APIError(cinerinoError2httpStatusCode(err), [err]);
         } else {
             // 500
-            apiError = new APIError(
-                INTERNAL_SERVER_ERROR, [new cinerinoapi.factory.errors.Cinerino(<any>'InternalServerError', err.message)]);
+            apiError = new APIError(INTERNAL_SERVER_ERROR, [new cinerinoapi.transporters.RequestError(err.message)]);
         }
     }
 
@@ -50,42 +49,42 @@ export default (err: any, __: Request, res: Response, next: NextFunction) => {
         });
 };
 
-function cinerinoError2httpStatusCode(err: cinerinoapi.factory.errors.Cinerino) {
+function cinerinoError2httpStatusCode(err: cinerinoapi.transporters.RequestError) {
     let statusCode = BAD_REQUEST;
 
-    switch (true) {
+    switch (err.code) {
         // 401
-        case (err instanceof cinerinoapi.factory.errors.Unauthorized):
+        case (UNAUTHORIZED):
             statusCode = UNAUTHORIZED;
             break;
 
         // 403
-        case (err instanceof cinerinoapi.factory.errors.Forbidden):
+        case (FORBIDDEN):
             statusCode = FORBIDDEN;
             break;
 
         // 404
-        case (err instanceof cinerinoapi.factory.errors.NotFound):
+        case (NOT_FOUND):
             statusCode = NOT_FOUND;
             break;
 
         // 409
-        case (err instanceof cinerinoapi.factory.errors.AlreadyInUse):
+        case (CONFLICT):
             statusCode = CONFLICT;
             break;
 
         // 429
-        case (err instanceof cinerinoapi.factory.errors.RateLimitExceeded):
+        case (TOO_MANY_REQUESTS):
             statusCode = TOO_MANY_REQUESTS;
             break;
 
         // 502
-        case (err instanceof cinerinoapi.factory.errors.NotImplemented):
+        case (NOT_IMPLEMENTED):
             statusCode = NOT_IMPLEMENTED;
             break;
 
         // 503
-        case (err instanceof cinerinoapi.factory.errors.ServiceUnavailable):
+        case (SERVICE_UNAVAILABLE):
             statusCode = SERVICE_UNAVAILABLE;
             break;
 

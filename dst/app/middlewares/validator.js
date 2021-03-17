@@ -22,7 +22,7 @@ exports.default = (req, __, next) => __awaiter(void 0, void 0, void 0, function*
     if (!validatorResult.isEmpty()) {
         const errors = validatorResult.array()
             .map((mappedRrror) => {
-            return new cinerinoapi.factory.errors.Argument(mappedRrror.param, mappedRrror.msg);
+            return new cinerinoapi.transporters.RequestError(`${mappedRrror.param} ${mappedRrror.msg}`);
         });
         next(new api_1.APIError(http_status_1.BAD_REQUEST, errors));
     }

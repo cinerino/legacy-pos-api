@@ -15,7 +15,6 @@ import permitScopes from '../../middlewares/permitScopes';
 import rateLimit from '../../middlewares/rateLimit';
 import validator from '../../middlewares/validator';
 
-const USE_ORDER_CODE = process.env.USE_ORDER_CODE === '1';
 const CODE_EXPIRES_IN_SECONDS = 8035200; // 93日
 const WAITER_SCOPE = process.env.WAITER_SCOPE;
 
@@ -358,10 +357,8 @@ placeOrderTransactionsRouter.post(
                     });
             });
 
-            let code: string | undefined;
-            if (USE_ORDER_CODE) {
-                code = await publishCode(req, transactionResult.order, req.params.transactionId);
-            }
+            // 万が一コードを発行できないケースもあるので、考慮すること
+            const code = await publishCode(req, transactionResult.order, req.params.transactionId);
 
             res.status(CREATED)
                 .json({

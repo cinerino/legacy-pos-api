@@ -23,7 +23,7 @@ exports.default = (err, __, res, next) => {
         if (Array.isArray(err)) {
             apiError = new api_1.APIError(cinerinoError2httpStatusCode(err[0]), err);
         }
-        else if (err instanceof cinerinoapi.transporters.RequestError) {
+        else if (err.name === 'CinerinoRequestError') {
             apiError = new api_1.APIError(cinerinoError2httpStatusCode(err), [err]);
         }
         else {
@@ -38,38 +38,8 @@ exports.default = (err, __, res, next) => {
 };
 function cinerinoError2httpStatusCode(err) {
     let statusCode = http_status_1.BAD_REQUEST;
-    switch (err.code) {
-        // 401
-        case (http_status_1.UNAUTHORIZED):
-            statusCode = http_status_1.UNAUTHORIZED;
-            break;
-        // 403
-        case (http_status_1.FORBIDDEN):
-            statusCode = http_status_1.FORBIDDEN;
-            break;
-        // 404
-        case (http_status_1.NOT_FOUND):
-            statusCode = http_status_1.NOT_FOUND;
-            break;
-        // 409
-        case (http_status_1.CONFLICT):
-            statusCode = http_status_1.CONFLICT;
-            break;
-        // 429
-        case (http_status_1.TOO_MANY_REQUESTS):
-            statusCode = http_status_1.TOO_MANY_REQUESTS;
-            break;
-        // 502
-        case (http_status_1.NOT_IMPLEMENTED):
-            statusCode = http_status_1.NOT_IMPLEMENTED;
-            break;
-        // 503
-        case (http_status_1.SERVICE_UNAVAILABLE):
-            statusCode = http_status_1.SERVICE_UNAVAILABLE;
-            break;
-        // 400
-        default:
-            statusCode = http_status_1.BAD_REQUEST;
+    if (typeof err.code === 'number') {
+        statusCode = err.code;
     }
     return statusCode;
 }

@@ -4,16 +4,7 @@
 import * as cinerinoapi from '@cinerino/sdk';
 import * as createDebug from 'debug';
 import { NextFunction, Request, Response } from 'express';
-import {
-    BAD_REQUEST,
-    CONFLICT, FORBIDDEN,
-    INTERNAL_SERVER_ERROR,
-    NOT_FOUND,
-    NOT_IMPLEMENTED,
-    SERVICE_UNAVAILABLE,
-    TOO_MANY_REQUESTS,
-    UNAUTHORIZED
-} from 'http-status';
+import { BAD_REQUEST, INTERNAL_SERVER_ERROR } from 'http-status';
 
 import { APIError } from '../error/api';
 
@@ -35,7 +26,7 @@ export default (err: any, __: Request, res: Response, next: NextFunction) => {
         // エラー配列が入ってくることもある
         if (Array.isArray(err)) {
             apiError = new APIError(cinerinoError2httpStatusCode(err[0]), err);
-        } else if (err instanceof cinerinoapi.transporters.RequestError) {
+        } else if (err.name === 'CinerinoRequestError') {
             apiError = new APIError(cinerinoError2httpStatusCode(err), [err]);
         } else {
             // 500
@@ -51,46 +42,8 @@ export default (err: any, __: Request, res: Response, next: NextFunction) => {
 
 function cinerinoError2httpStatusCode(err: cinerinoapi.transporters.RequestError) {
     let statusCode = BAD_REQUEST;
-
-    switch (err.code) {
-        // 401
-        case (UNAUTHORIZED):
-            statusCode = UNAUTHORIZED;
-            break;
-
-        // 403
-        case (FORBIDDEN):
-            statusCode = FORBIDDEN;
-            break;
-
-        // 404
-        case (NOT_FOUND):
-            statusCode = NOT_FOUND;
-            break;
-
-        // 409
-        case (CONFLICT):
-            statusCode = CONFLICT;
-            break;
-
-        // 429
-        case (TOO_MANY_REQUESTS):
-            statusCode = TOO_MANY_REQUESTS;
-            break;
-
-        // 502
-        case (NOT_IMPLEMENTED):
-            statusCode = NOT_IMPLEMENTED;
-            break;
-
-        // 503
-        case (SERVICE_UNAVAILABLE):
-            statusCode = SERVICE_UNAVAILABLE;
-            break;
-
-        // 400
-        default:
-            statusCode = BAD_REQUEST;
+    if (typeof err.code === 'number') {
+        statusCode = err.code;
     }
 
     return statusCode;

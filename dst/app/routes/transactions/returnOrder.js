@@ -34,48 +34,77 @@ returnOrderTransactionsRouter.use(rateLimit_1.default);
  * 上映日と購入番号で返品
  */
 returnOrderTransactionsRouter.post('/confirm', permitScopes_1.default(['pos']), ...[
-    express_validator_1.body('performance_day')
-        .not()
-        .isEmpty()
-        .withMessage(() => 'required'),
-    express_validator_1.body('payment_no')
-        .not()
-        .isEmpty()
-        .withMessage(() => 'required')
+    express_validator_1.oneOf([
+        [
+            // 廃止予定↓
+            express_validator_1.body('performance_day')
+                .not()
+                .isEmpty()
+                .withMessage(() => 'required'),
+            express_validator_1.body('payment_no')
+                .not()
+                .isEmpty()
+                .withMessage(() => 'required')
+        ],
+        [
+            express_validator_1.body('orderNumber')
+                .not()
+                .isEmpty()
+                .withMessage(() => 'required'),
+            express_validator_1.body('customer.telephone')
+                .not()
+                .isEmpty()
+                .withMessage(() => 'required')
+        ]
+    ])
 ], validator_1.default, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a, _b;
     try {
         const returnOrderService = new cinerinoapi.service.transaction.ReturnOrder({
             auth: req.authClient,
             endpoint: process.env.CINERINO_API_ENDPOINT,
             project: { id: req.project.id }
         });
-        // 注文取得
-        const confirmationNumber = `${req.body.performance_day}${req.body.payment_no}`;
-        const key = `${placeOrder_1.ORDERS_KEY_PREFIX}${confirmationNumber}`;
-        const order = yield new Promise((resolve, reject) => {
-            redisClient.get(key, (err, result) => {
-                if (err !== null) {
-                    reject(err);
-                }
-                else {
-                    if (typeof result === 'string') {
-                        resolve(JSON.parse(result));
+        let returnableOrder;
+        if (typeof req.body.performance_day === 'string' && req.body.performance_day.length > 0) {
+            // 注文取得
+            const confirmationNumber = `${req.body.performance_day}${req.body.payment_no}`;
+            const key = `${placeOrder_1.ORDERS_KEY_PREFIX}${confirmationNumber}`;
+            const order = yield new Promise((resolve, reject) => {
+                redisClient.get(key, (err, result) => {
+                    if (err !== null) {
+                        reject(err);
                     }
                     else {
-                        reject(new cinerinoapi.factory.errors.NotFound('Order'));
+                        if (typeof result === 'string') {
+                            resolve(JSON.parse(result));
+                        }
+                        else {
+                            reject(new cinerinoapi.factory.errors.NotFound('Order'));
+                        }
                     }
-                }
+                });
             });
-        });
+            returnableOrder = {
+                orderNumber: String(order.orderNumber),
+                customer: { telephone: String((_a = order.customer) === null || _a === void 0 ? void 0 : _a.telephone) }
+            };
+        }
+        if (typeof req.body.orderNumber === 'string' && req.body.orderNumber.length > 0) {
+            returnableOrder = {
+                orderNumber: String(req.body.orderNumber),
+                customer: { telephone: String((_b = req.body.customer) === null || _b === void 0 ? void 0 : _b.telephone) }
+            };
+        }
+        if (returnableOrder === undefined) {
+            throw new cinerinoapi.factory.errors.Argument('params');
+        }
         const returnOrderTransaction = yield returnOrderService.start({
             expires: moment()
                 .add(1, 'minute')
                 .toDate(),
             object: {
-                order: {
-                    orderNumber: order.orderNumber,
-                    customer: { telephone: order.customer.telephone }
-                }
+                order: [returnableOrder]
             }
         });
         yield returnOrderService.confirm({ id: returnOrderTransaction.id });

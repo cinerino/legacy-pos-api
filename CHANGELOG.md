@@ -11,6 +11,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 ### Changed
 
 - 注文取引確定結果に注文番号を追加
+- 注文番号での返品処理に対応
 
 ### Deprecated
 

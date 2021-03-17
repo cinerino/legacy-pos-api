@@ -57,7 +57,7 @@
   "keywords": [],
   "license": "ISC",
   "main": "dst/server.js",
-  "name": "cinerino-legacy-pos-api",
+  "name": "@smarttheater/legacy-pos-api",
   "private": true,
   "repository": {},
   "scripts": {

@@ -19,12 +19,12 @@ const CODE_EXPIRES_IN_SECONDS = 8035200; // 93日
 const WAITER_SCOPE = process.env.WAITER_SCOPE;
 
 const TRANSACTION_TTL = 3600;
-const TRANSACTION_KEY_PREFIX = 'cinerino-legacy-pos-api:placeOrder:';
+const TRANSACTION_KEY_PREFIX = 'smarttheater-legacy-pos-api:placeOrder:';
 const TRANSACTION_AMOUNT_TTL = TRANSACTION_TTL;
 const TRANSACTION_AMOUNT_KEY_PREFIX = `${TRANSACTION_KEY_PREFIX}amount:`;
 
 const ORDERS_TTL = 86400;
-export const ORDERS_KEY_PREFIX = 'cinerino-legacy-pos-api:orders:';
+export const ORDERS_KEY_PREFIX = 'smarttheater-legacy-pos-api:orders:';
 
 const redisClient = redis.createClient({
     host: <string>process.env.REDIS_HOST,

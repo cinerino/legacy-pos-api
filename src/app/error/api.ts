@@ -1,13 +1,15 @@
 import * as cinerinoapi from '@cinerino/sdk';
 
+export type ICinerinoError = cinerinoapi.factory.errors.Cinerino | cinerinoapi.transporters.RequestError;
+
 /**
  * APIエラー
  */
 export class APIError extends Error {
     public readonly code: number;
-    public readonly errors: cinerinoapi.transporters.RequestError[];
+    public readonly errors: ICinerinoError[];
 
-    constructor(code: number, errors: cinerinoapi.transporters.RequestError[]) {
+    constructor(code: number, errors: ICinerinoError[]) {
         const message = errors.map((error) => error.message)
             .join('\n');
         super(message);

@@ -1,11 +1,9 @@
 /**
  * 404ハンドラーミドルウェア
  */
+import * as cinerinoapi from '@cinerino/sdk';
 import { NextFunction, Request, Response } from 'express';
-import { NOT_FOUND } from 'http-status';
 
-import { APIError } from '../error/api';
-
-export default (__: Request, ___: Response, next: NextFunction) => {
-    next(new APIError(NOT_FOUND, []));
+export default (req: Request, __: Response, next: NextFunction) => {
+    next(new cinerinoapi.factory.errors.NotFound(`router for [${req.originalUrl}]`));
 };

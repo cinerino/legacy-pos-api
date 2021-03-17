@@ -309,6 +309,8 @@ placeOrderTransactionsRouter.post('/:transactionId/confirm', permitScopes_1.defa
         }
         res.status(http_status_1.CREATED)
             .json({
+            orderNumber: transactionResult.order.orderNumber,
+            confirmationNumber: transactionResult.order.confirmationNumber,
             // POSへのレスポンスとしてeventReservations属性を生成
             eventReservations: transactionResult.order.acceptedOffers
                 .map((o) => {

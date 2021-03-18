@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 - 注文取引確定結果に注文番号を追加
 - 注文番号での返品処理に対応
+- イベント検索時の取得属性を最適化
 
 ### Deprecated
 

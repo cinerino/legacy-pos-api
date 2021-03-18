@@ -28,6 +28,7 @@ export interface IEvent4pos {
     maximumAttendeeCapacity?: number;
     remainingAttendeeCapacity?: number;
     eventStatus?: string;
+    additionalProperty?: cinerinoapi.factory.chevre.propertyValue.IPropertyValue<string>[];
 }
 
 export interface ISearchConditions4pos {
@@ -87,7 +88,7 @@ eventsRouter.get(
                 startThrough: params.startThrough,
                 ...{
                     $projection: {
-                        additionalProperty: 0,
+                        aggregateEntranceGate: 0,
                         aggregateOffer: 0,
                         aggregateReservation: 0,
                         hasOfferCatalog: 0,
@@ -120,6 +121,7 @@ function event2event4pos(event: cinerinoapi.factory.chevre.event.screeningEvent.
         maximumAttendeeCapacity: event.maximumAttendeeCapacity,
         remainingAttendeeCapacity: event.remainingAttendeeCapacity,
         eventStatus: event.eventStatus,
+        additionalProperty: (Array.isArray(event.additionalProperty)) ? event.additionalProperty : [],
         ...(event.doorTime !== undefined) ? { doorTime: event.doorTime } : undefined,
         ...(typeof event.name?.ja === 'string') ? { name: event.name } : undefined,
         ...(typeof event.maximumAttendeeCapacity === 'number') ? { maximumAttendeeCapacity: event.maximumAttendeeCapacity } : undefined,

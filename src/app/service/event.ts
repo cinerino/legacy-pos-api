@@ -49,7 +49,7 @@ export function searchByChevre(params: ISearchConditions4pos, clientId: string) 
         } else {
             const searchConditions: cinerinoapi.factory.chevre.event.screeningEvent.ISearchConditions = {
                 // tslint:disable-next-line:no-magic-numbers
-                limit: (params.limit !== undefined) ? Number(params.limit) : 100,
+                limit: (params.limit !== undefined) ? Math.min(Number(params.limit), 100) : 100,
                 page: (params.page !== undefined) ? Math.max(Number(params.page), 1) : 1,
                 sort: { startDate: 1 },
                 typeOf: cinerinoapi.factory.chevre.eventType.ScreeningEvent,
@@ -63,7 +63,14 @@ export function searchByChevre(params: ISearchConditions4pos, clientId: string) 
                     }
                     : undefined,
                 ...{
-                    $projection: { aggregateReservation: 0 }
+                    $projection: {
+                        aggregateEntranceGate: 0,
+                        aggregateReservation: 0,
+                        hasOfferCatalog: 0,
+                        location: 0,
+                        superEvent: 0,
+                        workPerformed: 0
+                    }
                 }
             };
 

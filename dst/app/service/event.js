@@ -27,7 +27,7 @@ function searchByChevre(params, clientId) {
         else {
             const searchConditions = Object.assign(Object.assign({ 
                 // tslint:disable-next-line:no-magic-numbers
-                limit: (params.limit !== undefined) ? Number(params.limit) : 100, page: (params.page !== undefined) ? Math.max(Number(params.page), 1) : 1, sort: { startDate: 1 }, typeOf: cinerinoapi.factory.chevre.eventType.ScreeningEvent }, (typeof params.day === 'string' && params.day.length > 0)
+                limit: (params.limit !== undefined) ? Math.min(Number(params.limit), 100) : 100, page: (params.page !== undefined) ? Math.max(Number(params.page), 1) : 1, sort: { startDate: 1 }, typeOf: cinerinoapi.factory.chevre.eventType.ScreeningEvent }, (typeof params.day === 'string' && params.day.length > 0)
                 ? {
                     startFrom: moment(`${params.day}T00:00:00+09:00`, 'YYYYMMDDTHH:mm:ssZ')
                         .toDate(),
@@ -36,7 +36,14 @@ function searchByChevre(params, clientId) {
                         .toDate()
                 }
                 : undefined), {
-                $projection: { aggregateReservation: 0 }
+                $projection: {
+                    aggregateEntranceGate: 0,
+                    aggregateReservation: 0,
+                    hasOfferCatalog: 0,
+                    location: 0,
+                    superEvent: 0,
+                    workPerformed: 0
+                }
             });
             const searchResult = yield eventService.search(searchConditions);
             events = searchResult.data;

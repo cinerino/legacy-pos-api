@@ -23,32 +23,7 @@ exports.default = (req, res, next) => __awaiter(void 0, void 0, void 0, function
         yield express_middleware_1.cognitoAuth({
             issuers: ISSUERS,
             authorizedHandler: (user, token) => __awaiter(void 0, void 0, void 0, function* () {
-                const identifier = [
-                    { name: 'tokenIssuer', value: user.iss },
-                    { name: 'clientId', value: user.client_id },
-                    { name: 'hostname', value: req.hostname }
-                ];
-                // リクエストユーザーの属性を識別子に追加
-                try {
-                    identifier.push(...Object.keys(user)
-                        .filter((key) => key !== 'scope' && key !== 'scopes') // スコープ情報はデータ量がDBの制限にはまる可能性がある
-                        .map((key) => {
-                        return {
-                            name: String(key),
-                            value: String(user[key])
-                        };
-                    }));
-                }
-                catch (error) {
-                    // no op
-                }
                 req.user = user;
-                req.accessToken = token;
-                req.agent = {
-                    typeOf: cinerinoapi.factory.chevre.creativeWorkType.WebApplication,
-                    id: user.sub,
-                    identifier: identifier
-                };
                 // リクエストに対してCinerino認証クライアントをセット
                 const auth = new cinerinoapi.auth.ClientCredentials({
                     domain: '',
@@ -57,7 +32,7 @@ exports.default = (req, res, next) => __awaiter(void 0, void 0, void 0, function
                     scopes: [],
                     state: ''
                 });
-                auth.setCredentials({ access_token: req.accessToken });
+                auth.setCredentials({ access_token: token });
                 req.authClient = auth;
                 next();
             }),

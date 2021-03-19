@@ -17,7 +17,7 @@ import {
 
 import { APIError } from '../error/api';
 
-const debug = createDebug('cinerino-legacy-pos-api:middlewares:errorHandler');
+const debug = createDebug('smarttheater-legacy-pos-api:middlewares:errorHandler');
 
 export default (err: any, __: Request, res: Response, next: NextFunction) => {
     debug('handling err...', err);
@@ -37,10 +37,11 @@ export default (err: any, __: Request, res: Response, next: NextFunction) => {
             apiError = new APIError(cinerinoError2httpStatusCode(err[0]), err);
         } else if (err instanceof cinerinoapi.factory.errors.Cinerino) {
             apiError = new APIError(cinerinoError2httpStatusCode(err), [err]);
+        } else if (err.name === 'CinerinoRequestError') {
+            apiError = new APIError(cinerinoRequestError2httpStatusCode(err), [err]);
         } else {
             // 500
-            apiError = new APIError(
-                INTERNAL_SERVER_ERROR, [new cinerinoapi.factory.errors.Cinerino(<any>'InternalServerError', err.message)]);
+            apiError = new APIError(INTERNAL_SERVER_ERROR, [new cinerinoapi.factory.errors.Cinerino(err.message)]);
         }
     }
 
@@ -49,6 +50,15 @@ export default (err: any, __: Request, res: Response, next: NextFunction) => {
             error: apiError.toObject()
         });
 };
+
+function cinerinoRequestError2httpStatusCode(err: cinerinoapi.transporters.RequestError) {
+    let statusCode = BAD_REQUEST;
+    if (typeof err.code === 'number') {
+        statusCode = err.code;
+    }
+
+    return statusCode;
+}
 
 function cinerinoError2httpStatusCode(err: cinerinoapi.factory.errors.Cinerino) {
     let statusCode = BAD_REQUEST;
@@ -91,7 +101,6 @@ function cinerinoError2httpStatusCode(err: cinerinoapi.factory.errors.Cinerino) 
 
         // 400
         default:
-            statusCode = BAD_REQUEST;
     }
 
     return statusCode;

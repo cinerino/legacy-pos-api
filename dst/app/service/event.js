@@ -27,7 +27,7 @@ function searchByChevre(params, clientId) {
         else {
             const searchConditions = Object.assign(Object.assign({ 
                 // tslint:disable-next-line:no-magic-numbers
-                limit: (params.limit !== undefined) ? Number(params.limit) : 100, page: (params.page !== undefined) ? Math.max(Number(params.page), 1) : 1, sort: { startDate: 1 }, typeOf: cinerinoapi.factory.chevre.eventType.ScreeningEvent }, (typeof params.day === 'string' && params.day.length > 0)
+                limit: (params.limit !== undefined) ? Math.min(Number(params.limit), 100) : 100, page: (params.page !== undefined) ? Math.max(Number(params.page), 1) : 1, sort: { startDate: 1 }, typeOf: cinerinoapi.factory.chevre.eventType.ScreeningEvent }, (typeof params.day === 'string' && params.day.length > 0)
                 ? {
                     startFrom: moment(`${params.day}T00:00:00+09:00`, 'YYYYMMDDTHH:mm:ssZ')
                         .toDate(),
@@ -36,7 +36,14 @@ function searchByChevre(params, clientId) {
                         .toDate()
                 }
                 : undefined), {
-                $projection: { aggregateReservation: 0 }
+                $projection: {
+                    aggregateEntranceGate: 0,
+                    aggregateReservation: 0,
+                    hasOfferCatalog: 0,
+                    location: 0,
+                    superEvent: 0,
+                    workPerformed: 0
+                }
             });
             const searchResult = yield eventService.search(searchConditions);
             events = searchResult.data;
@@ -74,15 +81,17 @@ function event2event4pos(params) {
     const unitPriceOffers = params.unitPriceOffers;
     // デフォルトはイベントのremainingAttendeeCapacity
     let seatStatus = event.remainingAttendeeCapacity;
-    const normalOffer = unitPriceOffers.find((o) => { var _a, _b; return ((_b = (_a = o.additionalProperty) === null || _a === void 0 ? void 0 : _a.find((p) => p.name === 'category')) === null || _b === void 0 ? void 0 : _b.value) === 'Normal'; });
-    const wheelchairOffer = unitPriceOffers.find((o) => { var _a, _b; return ((_b = (_a = o.additionalProperty) === null || _a === void 0 ? void 0 : _a.find((p) => p.name === 'category')) === null || _b === void 0 ? void 0 : _b.value) === 'Wheelchair'; });
+    // const normalOffer = unitPriceOffers.find((o) => o.additionalProperty?.find((p) => p.name === 'category')?.value === 'Normal');
+    // const wheelchairOffer =
+    //     unitPriceOffers.find((o) => o.additionalProperty?.find((p) => p.name === 'category')?.value === 'Wheelchair');
     // 一般座席の残席数
-    const normalOfferRemainingAttendeeCapacity = (_c = (_b = (_a = event.aggregateOffer) === null || _a === void 0 ? void 0 : _a.offers) === null || _b === void 0 ? void 0 : _b.find((o) => o.id === (normalOffer === null || normalOffer === void 0 ? void 0 : normalOffer.id))) === null || _c === void 0 ? void 0 : _c.remainingAttendeeCapacity;
+    // aggregateOfferのcategoryで判定する
+    const normalOfferRemainingAttendeeCapacity = (_c = (_b = (_a = event.aggregateOffer) === null || _a === void 0 ? void 0 : _a.offers) === null || _b === void 0 ? void 0 : _b.find((o) => { var _a; return ((_a = o.category) === null || _a === void 0 ? void 0 : _a.codeValue) === 'Normal'; })) === null || _c === void 0 ? void 0 : _c.remainingAttendeeCapacity;
     if (typeof normalOfferRemainingAttendeeCapacity === 'number') {
         seatStatus = normalOfferRemainingAttendeeCapacity;
     }
     // 車椅子座席の残席数
-    const wheelchairAvailable = (_f = (_e = (_d = event.aggregateOffer) === null || _d === void 0 ? void 0 : _d.offers) === null || _e === void 0 ? void 0 : _e.find((o) => o.id === (wheelchairOffer === null || wheelchairOffer === void 0 ? void 0 : wheelchairOffer.id))) === null || _f === void 0 ? void 0 : _f.remainingAttendeeCapacity;
+    const wheelchairAvailable = (_f = (_e = (_d = event.aggregateOffer) === null || _d === void 0 ? void 0 : _d.offers) === null || _e === void 0 ? void 0 : _e.find((o) => { var _a; return ((_a = o.category) === null || _a === void 0 ? void 0 : _a.codeValue) === 'Wheelchair'; })) === null || _f === void 0 ? void 0 : _f.remainingAttendeeCapacity;
     const tourNumber = (_h = (_g = event.additionalProperty) === null || _g === void 0 ? void 0 : _g.find((p) => p.name === 'tourNumber')) === null || _h === void 0 ? void 0 : _h.value;
     return {
         id: event.id,

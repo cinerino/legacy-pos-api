@@ -5,7 +5,7 @@ import * as cinerinoapi from '@cinerino/sdk';
 import * as createDebug from 'debug';
 import { NextFunction, Request, Response } from 'express';
 
-const debug = createDebug('cinerino-legacy-pos-api:middlewares:permitScopes');
+const debug = createDebug('smarttheater-legacy-pos-api:middlewares:permitScopes');
 
 /**
  * スコープインターフェース

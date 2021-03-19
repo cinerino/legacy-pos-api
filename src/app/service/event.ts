@@ -49,7 +49,7 @@ export function searchByChevre(params: ISearchConditions4pos, clientId: string) 
         } else {
             const searchConditions: cinerinoapi.factory.chevre.event.screeningEvent.ISearchConditions = {
                 // tslint:disable-next-line:no-magic-numbers
-                limit: (params.limit !== undefined) ? Number(params.limit) : 100,
+                limit: (params.limit !== undefined) ? Math.min(Number(params.limit), 100) : 100,
                 page: (params.page !== undefined) ? Math.max(Number(params.page), 1) : 1,
                 sort: { startDate: 1 },
                 typeOf: cinerinoapi.factory.chevre.eventType.ScreeningEvent,
@@ -63,7 +63,14 @@ export function searchByChevre(params: ISearchConditions4pos, clientId: string) 
                     }
                     : undefined,
                 ...{
-                    $projection: { aggregateReservation: 0 }
+                    $projection: {
+                        aggregateEntranceGate: 0,
+                        aggregateReservation: 0,
+                        hasOfferCatalog: 0,
+                        location: 0,
+                        superEvent: 0,
+                        workPerformed: 0
+                    }
                 }
             };
 
@@ -121,18 +128,21 @@ function event2event4pos(params: {
     // デフォルトはイベントのremainingAttendeeCapacity
     let seatStatus = event.remainingAttendeeCapacity;
 
-    const normalOffer = unitPriceOffers.find((o) => o.additionalProperty?.find((p) => p.name === 'category')?.value === 'Normal');
-    const wheelchairOffer = unitPriceOffers.find((o) => o.additionalProperty?.find((p) => p.name === 'category')?.value === 'Wheelchair');
+    // const normalOffer = unitPriceOffers.find((o) => o.additionalProperty?.find((p) => p.name === 'category')?.value === 'Normal');
+    // const wheelchairOffer =
+    //     unitPriceOffers.find((o) => o.additionalProperty?.find((p) => p.name === 'category')?.value === 'Wheelchair');
 
     // 一般座席の残席数
+    // aggregateOfferのcategoryで判定する
     const normalOfferRemainingAttendeeCapacity =
-        event.aggregateOffer?.offers?.find((o) => o.id === normalOffer?.id)?.remainingAttendeeCapacity;
+        event.aggregateOffer?.offers?.find((o) => o.category?.codeValue === 'Normal')?.remainingAttendeeCapacity;
     if (typeof normalOfferRemainingAttendeeCapacity === 'number') {
         seatStatus = normalOfferRemainingAttendeeCapacity;
     }
 
     // 車椅子座席の残席数
-    const wheelchairAvailable = event.aggregateOffer?.offers?.find((o) => o.id === wheelchairOffer?.id)?.remainingAttendeeCapacity;
+    const wheelchairAvailable =
+        event.aggregateOffer?.offers?.find((o) => o.category?.codeValue === 'Wheelchair')?.remainingAttendeeCapacity;
 
     const tourNumber = event.additionalProperty?.find((p) => p.name === 'tourNumber')?.value;
 

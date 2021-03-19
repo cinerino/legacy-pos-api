@@ -23,15 +23,14 @@ const redis = require("redis");
 const permitScopes_1 = require("../../middlewares/permitScopes");
 const rateLimit_1 = require("../../middlewares/rateLimit");
 const validator_1 = require("../../middlewares/validator");
-const USE_ORDER_CODE = process.env.USE_ORDER_CODE === '1';
 const CODE_EXPIRES_IN_SECONDS = 8035200; // 93日
 const WAITER_SCOPE = process.env.WAITER_SCOPE;
 const TRANSACTION_TTL = 3600;
-const TRANSACTION_KEY_PREFIX = 'cinerino-legacy-pos-api:placeOrder:';
+const TRANSACTION_KEY_PREFIX = 'smarttheater-legacy-pos-api:placeOrder:';
 const TRANSACTION_AMOUNT_TTL = TRANSACTION_TTL;
 const TRANSACTION_AMOUNT_KEY_PREFIX = `${TRANSACTION_KEY_PREFIX}amount:`;
 const ORDERS_TTL = 86400;
-exports.ORDERS_KEY_PREFIX = 'cinerino-legacy-pos-api:orders:';
+exports.ORDERS_KEY_PREFIX = 'smarttheater-legacy-pos-api:orders:';
 const redisClient = redis.createClient({
     host: process.env.REDIS_HOST,
     port: Number(process.env.REDIS_PORT),
@@ -303,12 +302,12 @@ placeOrderTransactionsRouter.post('/:transactionId/confirm', permitScopes_1.defa
                 }
             });
         });
-        let code;
-        if (USE_ORDER_CODE) {
-            code = yield publishCode(req, transactionResult.order, req.params.transactionId);
-        }
+        // 万が一コードを発行できないケースもあるので、考慮すること
+        const code = yield publishCode(req, transactionResult.order, req.params.transactionId);
         res.status(http_status_1.CREATED)
             .json({
+            orderNumber: transactionResult.order.orderNumber,
+            confirmationNumber: transactionResult.order.confirmationNumber,
             // POSへのレスポンスとしてeventReservations属性を生成
             eventReservations: transactionResult.order.acceptedOffers
                 .map((o) => {

@@ -7,7 +7,7 @@ const cinerinoapi = require("@cinerino/sdk");
 const createDebug = require("debug");
 const http_status_1 = require("http-status");
 const api_1 = require("../error/api");
-const debug = createDebug('cinerino-legacy-pos-api:middlewares:errorHandler');
+const debug = createDebug('smarttheater-legacy-pos-api:middlewares:errorHandler');
 exports.default = (err, __, res, next) => {
     debug('handling err...', err);
     if (res.headersSent) {
@@ -26,9 +26,12 @@ exports.default = (err, __, res, next) => {
         else if (err instanceof cinerinoapi.factory.errors.Cinerino) {
             apiError = new api_1.APIError(cinerinoError2httpStatusCode(err), [err]);
         }
+        else if (err.name === 'CinerinoRequestError') {
+            apiError = new api_1.APIError(cinerinoRequestError2httpStatusCode(err), [err]);
+        }
         else {
             // 500
-            apiError = new api_1.APIError(http_status_1.INTERNAL_SERVER_ERROR, [new cinerinoapi.factory.errors.Cinerino('InternalServerError', err.message)]);
+            apiError = new api_1.APIError(http_status_1.INTERNAL_SERVER_ERROR, [new cinerinoapi.factory.errors.Cinerino(err.message)]);
         }
     }
     res.status(apiError.code)
@@ -36,6 +39,13 @@ exports.default = (err, __, res, next) => {
         error: apiError.toObject()
     });
 };
+function cinerinoRequestError2httpStatusCode(err) {
+    let statusCode = http_status_1.BAD_REQUEST;
+    if (typeof err.code === 'number') {
+        statusCode = err.code;
+    }
+    return statusCode;
+}
 function cinerinoError2httpStatusCode(err) {
     let statusCode = http_status_1.BAD_REQUEST;
     switch (true) {
@@ -69,7 +79,6 @@ function cinerinoError2httpStatusCode(err) {
             break;
         // 400
         default:
-            statusCode = http_status_1.BAD_REQUEST;
     }
     return statusCode;
 }

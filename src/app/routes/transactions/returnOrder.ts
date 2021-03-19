@@ -3,7 +3,7 @@
  */
 import * as cinerinoapi from '@cinerino/sdk';
 import { Router } from 'express';
-import { body } from 'express-validator';
+import { body, oneOf } from 'express-validator';
 import { CREATED } from 'http-status';
 import * as moment from 'moment';
 import * as redis from 'redis';
@@ -32,14 +32,29 @@ returnOrderTransactionsRouter.post(
     '/confirm',
     permitScopes(['pos']),
     ...[
-        body('performance_day')
-            .not()
-            .isEmpty()
-            .withMessage(() => 'required'),
-        body('payment_no')
-            .not()
-            .isEmpty()
-            .withMessage(() => 'required')
+        oneOf([
+            [
+                // 廃止予定↓
+                body('performance_day')
+                    .not()
+                    .isEmpty()
+                    .withMessage(() => 'required'),
+                body('payment_no')
+                    .not()
+                    .isEmpty()
+                    .withMessage(() => 'required')
+            ],
+            [
+                body('orderNumber')
+                    .not()
+                    .isEmpty()
+                    .withMessage(() => 'required'),
+                body('customer.telephone')
+                    .not()
+                    .isEmpty()
+                    .withMessage(() => 'required')
+            ]
+        ])
     ],
     validator,
     async (req, res, next) => {
@@ -50,32 +65,48 @@ returnOrderTransactionsRouter.post(
                 project: { id: req.project.id }
             });
 
-            // 注文取得
-            const confirmationNumber = `${req.body.performance_day}${req.body.payment_no}`;
-            const key = `${ORDERS_KEY_PREFIX}${confirmationNumber}`;
-            const order = await new Promise<cinerinoapi.factory.order.IOrder>((resolve, reject) => {
-                redisClient.get(key, (err, result) => {
-                    if (err !== null) {
-                        reject(err);
-                    } else {
-                        if (typeof result === 'string') {
-                            resolve(JSON.parse(result));
+            let returnableOrder: cinerinoapi.factory.transaction.returnOrder.IReturnableOrder | undefined;
+
+            if (typeof req.body.performance_day === 'string' && req.body.performance_day.length > 0) {
+                // 注文取得
+                const confirmationNumber = `${req.body.performance_day}${req.body.payment_no}`;
+                const key = `${ORDERS_KEY_PREFIX}${confirmationNumber}`;
+                const order = await new Promise<cinerinoapi.factory.order.IOrder>((resolve, reject) => {
+                    redisClient.get(key, (err, result) => {
+                        if (err !== null) {
+                            reject(err);
                         } else {
-                            reject(new cinerinoapi.factory.errors.NotFound('Order'));
+                            if (typeof result === 'string') {
+                                resolve(JSON.parse(result));
+                            } else {
+                                reject(new cinerinoapi.factory.errors.NotFound('Order'));
+                            }
                         }
-                    }
+                    });
                 });
-            });
+                returnableOrder = {
+                    orderNumber: String(order.orderNumber),
+                    customer: { telephone: String(order.customer?.telephone) }
+                };
+            }
+
+            if (typeof req.body.orderNumber === 'string' && req.body.orderNumber.length > 0) {
+                returnableOrder = {
+                    orderNumber: String(req.body.orderNumber),
+                    customer: { telephone: String(req.body.customer?.telephone) }
+                };
+            }
+
+            if (returnableOrder === undefined) {
+                throw new cinerinoapi.factory.errors.Argument('params');
+            }
 
             const returnOrderTransaction = await returnOrderService.start({
                 expires: moment()
                     .add(1, 'minute')
                     .toDate(),
                 object: {
-                    order: {
-                        orderNumber: order.orderNumber,
-                        customer: { telephone: order.customer.telephone }
-                    }
+                    order: [returnableOrder]
                 }
             });
 

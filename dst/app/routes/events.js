@@ -52,7 +52,7 @@ eventsRouter.get('', permitScopes_1.default(['pos']), ...[
             // tslint:disable-next-line:no-magic-numbers
             limit: (typeof params.limit === 'number') ? Math.min(params.limit, 100) : 100, page: (typeof params.page === 'number') ? Math.max(params.page, 1) : 1, sort: { startDate: 1 }, typeOf: cinerinoapi.factory.chevre.eventType.ScreeningEvent, startFrom: params.startFrom, startThrough: params.startThrough }, {
             $projection: {
-                additionalProperty: 0,
+                aggregateEntranceGate: 0,
                 aggregateOffer: 0,
                 aggregateReservation: 0,
                 hasOfferCatalog: 0,
@@ -70,7 +70,7 @@ eventsRouter.get('', permitScopes_1.default(['pos']), ...[
 exports.default = eventsRouter;
 function event2event4pos(event) {
     var _a, _b;
-    return Object.assign(Object.assign(Object.assign(Object.assign({ id: event.id, location: Object.assign(Object.assign({}, (typeof event.location.branchCode === 'string') ? { branchCode: event.location.branchCode } : undefined), (typeof ((_a = event.location.name) === null || _a === void 0 ? void 0 : _a.ja) === 'string') ? { name: event.location.name } : undefined), endDate: event.endDate, startDate: event.startDate, maximumAttendeeCapacity: event.maximumAttendeeCapacity, remainingAttendeeCapacity: event.remainingAttendeeCapacity, eventStatus: event.eventStatus }, (event.doorTime !== undefined) ? { doorTime: event.doorTime } : undefined), (typeof ((_b = event.name) === null || _b === void 0 ? void 0 : _b.ja) === 'string') ? { name: event.name } : undefined), (typeof event.maximumAttendeeCapacity === 'number') ? { maximumAttendeeCapacity: event.maximumAttendeeCapacity } : undefined), (typeof event.remainingAttendeeCapacity === 'number')
+    return Object.assign(Object.assign(Object.assign(Object.assign({ id: event.id, location: Object.assign(Object.assign({}, (typeof event.location.branchCode === 'string') ? { branchCode: event.location.branchCode } : undefined), (typeof ((_a = event.location.name) === null || _a === void 0 ? void 0 : _a.ja) === 'string') ? { name: event.location.name } : undefined), endDate: event.endDate, startDate: event.startDate, maximumAttendeeCapacity: event.maximumAttendeeCapacity, remainingAttendeeCapacity: event.remainingAttendeeCapacity, eventStatus: event.eventStatus, additionalProperty: (Array.isArray(event.additionalProperty)) ? event.additionalProperty : [] }, (event.doorTime !== undefined) ? { doorTime: event.doorTime } : undefined), (typeof ((_b = event.name) === null || _b === void 0 ? void 0 : _b.ja) === 'string') ? { name: event.name } : undefined), (typeof event.maximumAttendeeCapacity === 'number') ? { maximumAttendeeCapacity: event.maximumAttendeeCapacity } : undefined), (typeof event.remainingAttendeeCapacity === 'number')
         ? { remainingAttendeeCapacity: event.remainingAttendeeCapacity }
         : undefined);
 }

@@ -9,37 +9,37 @@
     }
   ],
   "dependencies": {
-    "@cinerino/sdk": "1.20.1",
+    "@cinerino/sdk": "1.21.1",
     "@motionpicture/express-middleware": "^0.1.1",
     "body-parser": "^1.18.2",
     "cors": "^2.8.4",
-    "debug": "^3.1.0",
+    "debug": "^3.2.7",
     "express": "^4.16.2",
-    "express-validator": "^6.5.0",
+    "express-validator": "^6.10.0",
     "helmet": "^3.9.0",
-    "http-status": "^1.2.0",
+    "http-status": "^1.5.0",
     "ioredis": "^3.2.2",
-    "moment": "^2.20.1",
-    "moment-timezone": "^0.5.25",
-    "node-fetch": "^2.6.0",
+    "moment": "^2.29.1",
+    "moment-timezone": "^0.5.33",
+    "node-fetch": "^2.6.1",
     "redis": "^2.8.0"
   },
   "description": "TTTS API Application",
   "devDependencies": {
     "@types/body-parser": "0.0.34",
     "@types/config": "0.0.32",
-    "@types/cors": "^2.8.3",
+    "@types/cors": "^2.8.10",
     "@types/debug": "0.0.30",
-    "@types/express": "^4.11.0",
+    "@types/express": "^4.17.11",
     "@types/express-validator": "^3.0.0",
     "@types/helmet": "0.0.35",
     "@types/http-status": "^0.2.30",
     "@types/ioredis": "^3.2.24",
     "@types/mocha": "^2.2.46",
     "@types/moment-timezone": "^0.5.12",
-    "@types/node": "^8.10.59",
-    "@types/node-fetch": "^2.5.7",
-    "@types/redis": "^2.8.25",
+    "@types/node": "^8.10.66",
+    "@types/node-fetch": "^2.5.8",
+    "@types/redis": "^2.8.28",
     "@types/request": "^2.48.5",
     "@types/request-promise-native": "^1.0.17",
     "mocha": "^3.5.3",
@@ -48,7 +48,7 @@
     "ts-node": "^8.3.0",
     "tslint": "^6.1.2",
     "tslint-microsoft-contrib": "^6.2.0",
-    "typescript": "^3.9.3"
+    "typescript": "^3.9.9"
   },
   "engines": {
     "node": ">=8.0.0",
@@ -57,7 +57,7 @@
   "keywords": [],
   "license": "ISC",
   "main": "dst/server.js",
-  "name": "cinerino-legacy-pos-api",
+  "name": "@smarttheater/legacy-pos-api",
   "private": true,
   "repository": {},
   "scripts": {
@@ -74,5 +74,5 @@
     "version": "git add -A",
     "postversion": "git push origin --tags"
   },
-  "version": "1.9.0"
+  "version": "1.10.0"
 }

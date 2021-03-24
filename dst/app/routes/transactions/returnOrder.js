@@ -22,6 +22,10 @@ const permitScopes_1 = require("../../middlewares/permitScopes");
 const rateLimit_1 = require("../../middlewares/rateLimit");
 const validator_1 = require("../../middlewares/validator");
 const placeOrder_1 = require("./placeOrder");
+const USE_NEW_RETURN_ORDER_PARAMS_FROM = (typeof process.env.USE_NEW_RETURN_ORDER_PARAMS_FROM === 'string')
+    ? moment(process.env.USE_NEW_RETURN_ORDER_PARAMS_FROM)
+        .toDate()
+    : undefined;
 const redisClient = redis.createClient({
     host: process.env.REDIS_HOST,
     port: Number(process.env.REDIS_PORT),
@@ -58,8 +62,20 @@ returnOrderTransactionsRouter.post('/confirm', permitScopes_1.default(['pos']), 
         ]
     ])
 ], validator_1.default, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a, _b;
+    var _a, _b, _c;
     try {
+        const now = moment();
+        const useNewReturnOrderParams = USE_NEW_RETURN_ORDER_PARAMS_FROM instanceof Date
+            && moment(USE_NEW_RETURN_ORDER_PARAMS_FROM)
+                .isSameOrBefore(now);
+        if (useNewReturnOrderParams) {
+            if (typeof req.body.orderNumber !== 'string' || req.body.orderNumber.length === 0) {
+                throw new cinerinoapi.factory.errors.ArgumentNull('orderNumber');
+            }
+            if (typeof ((_a = req.body.customer) === null || _a === void 0 ? void 0 : _a.telephone) !== 'string' || req.body.customer.telephone.length === 0) {
+                throw new cinerinoapi.factory.errors.ArgumentNull('customer.telephone');
+            }
+        }
         const returnOrderService = new cinerinoapi.service.transaction.ReturnOrder({
             auth: req.authClient,
             endpoint: process.env.CINERINO_API_ENDPOINT,
@@ -87,13 +103,13 @@ returnOrderTransactionsRouter.post('/confirm', permitScopes_1.default(['pos']), 
             });
             returnableOrder = {
                 orderNumber: String(order.orderNumber),
-                customer: { telephone: String((_a = order.customer) === null || _a === void 0 ? void 0 : _a.telephone) }
+                customer: { telephone: String((_b = order.customer) === null || _b === void 0 ? void 0 : _b.telephone) }
             };
         }
         if (typeof req.body.orderNumber === 'string' && req.body.orderNumber.length > 0) {
             returnableOrder = {
                 orderNumber: String(req.body.orderNumber),
-                customer: { telephone: String((_b = req.body.customer) === null || _b === void 0 ? void 0 : _b.telephone) }
+                customer: { telephone: String((_c = req.body.customer) === null || _c === void 0 ? void 0 : _c.telephone) }
             };
         }
         if (returnableOrder === undefined) {

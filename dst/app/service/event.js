@@ -12,12 +12,21 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.searchByChevre = void 0;
 const cinerinoapi = require("@cinerino/sdk");
 const moment = require("moment-timezone");
-const EXCLUDE_TICKET_TYPES_IN_EVENTS = process.env.EXCLUDE_TICKET_TYPES_IN_EVENTS === '1';
+// const EXCLUDE_TICKET_TYPES_IN_EVENTS = process.env.EXCLUDE_TICKET_TYPES_IN_EVENTS === '1';
+const USE_NEW_RETURN_ORDER_PARAMS_FROM = (typeof process.env.USE_NEW_RETURN_ORDER_PARAMS_FROM === 'string')
+    ? moment(process.env.USE_NEW_RETURN_ORDER_PARAMS_FROM)
+        .toDate()
+    : undefined;
 function searchByChevre(params, clientId) {
     return (eventService) => __awaiter(this, void 0, void 0, function* () {
         var _a, _b, _c, _d;
         let events;
-        let excludeTicketTypes = EXCLUDE_TICKET_TYPES_IN_EVENTS;
+        const now = moment();
+        const useNewReturnOrderParams = USE_NEW_RETURN_ORDER_PARAMS_FROM instanceof Date
+            && moment(USE_NEW_RETURN_ORDER_PARAMS_FROM)
+                .isSameOrBefore(now);
+        // let excludeTicketTypes = EXCLUDE_TICKET_TYPES_IN_EVENTS;
+        let excludeTicketTypes = useNewReturnOrderParams;
         // performanceId指定の場合はこちら
         if (typeof params.performanceId === 'string') {
             const event = yield eventService.findById({ id: params.performanceId });
@@ -53,21 +62,25 @@ function searchByChevre(params, clientId) {
             return [];
         }
         const firstEvent = events[0];
-        const offers = yield eventService.searchTicketOffers({
-            event: { id: firstEvent.id },
-            seller: {
-                typeOf: (_b = (_a = firstEvent.offers) === null || _a === void 0 ? void 0 : _a.seller) === null || _b === void 0 ? void 0 : _b.typeOf,
-                id: (_d = (_c = firstEvent.offers) === null || _c === void 0 ? void 0 : _c.seller) === null || _d === void 0 ? void 0 : _d.id
-            },
-            store: {
-                id: clientId
-            }
-        });
-        const unitPriceOffers = offers.map((o) => {
-            // tslint:disable-next-line:max-line-length
-            const unitPriceSpec = o.priceSpecification.priceComponent.find((p) => p.typeOf === cinerinoapi.factory.chevre.priceSpecificationType.UnitPriceSpecification);
-            return Object.assign(Object.assign({}, o), { priceSpecification: unitPriceSpec });
-        });
+        let unitPriceOffers = [];
+        // オファーリスト除外でなければ、オファー検索
+        if (!excludeTicketTypes) {
+            const offers = yield eventService.searchTicketOffers({
+                event: { id: firstEvent.id },
+                seller: {
+                    typeOf: (_b = (_a = firstEvent.offers) === null || _a === void 0 ? void 0 : _a.seller) === null || _b === void 0 ? void 0 : _b.typeOf,
+                    id: (_d = (_c = firstEvent.offers) === null || _c === void 0 ? void 0 : _c.seller) === null || _d === void 0 ? void 0 : _d.id
+                },
+                store: {
+                    id: clientId
+                }
+            });
+            unitPriceOffers = offers.map((o) => {
+                // tslint:disable-next-line:max-line-length
+                const unitPriceSpec = o.priceSpecification.priceComponent.find((p) => p.typeOf === cinerinoapi.factory.chevre.priceSpecificationType.UnitPriceSpecification);
+                return Object.assign(Object.assign({}, o), { priceSpecification: unitPriceSpec });
+            });
+        }
         return events
             .map((event) => {
             return event2event4pos({ event, unitPriceOffers, excludeTicketTypes });
@@ -78,7 +91,6 @@ exports.searchByChevre = searchByChevre;
 function event2event4pos(params) {
     var _a, _b, _c, _d, _e, _f, _g, _h;
     const event = params.event;
-    const unitPriceOffers = params.unitPriceOffers;
     // デフォルトはイベントのremainingAttendeeCapacity
     let seatStatus = event.remainingAttendeeCapacity;
     // const normalOffer = unitPriceOffers.find((o) => o.additionalProperty?.find((p) => p.name === 'category')?.value === 'Normal');
@@ -108,7 +120,7 @@ function event2event4pos(params) {
                 : 'Suspended' }, (params.excludeTicketTypes)
             ? undefined
             : {
-                ticket_types: unitPriceOffers.map((unitPriceOffer) => {
+                ticket_types: params.unitPriceOffers.map((unitPriceOffer) => {
                     var _a, _b, _c, _d;
                     const availableNum = (_c = (_b = (_a = event.aggregateOffer) === null || _a === void 0 ? void 0 : _a.offers) === null || _b === void 0 ? void 0 : _b.find((o) => o.id === unitPriceOffer.id)) === null || _c === void 0 ? void 0 : _c.remainingAttendeeCapacity;
                     return {

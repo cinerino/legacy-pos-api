@@ -14,6 +14,11 @@ import validator from '../../middlewares/validator';
 
 import { ORDERS_KEY_PREFIX } from './placeOrder';
 
+const USE_NEW_RETURN_ORDER_PARAMS_FROM = (typeof process.env.USE_NEW_RETURN_ORDER_PARAMS_FROM === 'string')
+    ? moment(process.env.USE_NEW_RETURN_ORDER_PARAMS_FROM)
+        .toDate()
+    : undefined;
+
 const redisClient = redis.createClient({
     host: <string>process.env.REDIS_HOST,
     port: Number(<string>process.env.REDIS_PORT),
@@ -59,6 +64,19 @@ returnOrderTransactionsRouter.post(
     validator,
     async (req, res, next) => {
         try {
+            const now = moment();
+            const useNewReturnOrderParams = USE_NEW_RETURN_ORDER_PARAMS_FROM instanceof Date
+                && moment(USE_NEW_RETURN_ORDER_PARAMS_FROM)
+                    .isSameOrBefore(now);
+            if (useNewReturnOrderParams) {
+                if (typeof req.body.orderNumber !== 'string' || req.body.orderNumber.length === 0) {
+                    throw new cinerinoapi.factory.errors.ArgumentNull('orderNumber');
+                }
+                if (typeof req.body.customer?.telephone !== 'string' || req.body.customer.telephone.length === 0) {
+                    throw new cinerinoapi.factory.errors.ArgumentNull('customer.telephone');
+                }
+            }
+
             const returnOrderService = new cinerinoapi.service.transaction.ReturnOrder({
                 auth: req.authClient,
                 endpoint: <string>process.env.CINERINO_API_ENDPOINT,

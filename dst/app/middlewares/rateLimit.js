@@ -25,8 +25,8 @@ exports.default = (req, res, next) => __awaiter(void 0, void 0, void 0, function
     try {
         const routeIdentifier = `${req.baseUrl}${req.path}`;
         const rateLimitScope = (req.project !== undefined && req.project !== null && typeof req.project.id === 'string')
-            ? `smarttheater-legacy-pos-api:${req.project.id}:rateLimit:${routeIdentifier}:${req.method}`
-            : `smarttheater-legacy-pos-api:rateLimit:${routeIdentifier}:${req.method}`;
+            ? `smarttheater-api:${req.project.id}:rateLimit:${routeIdentifier}:${req.method}`
+            : `smarttheater-api:rateLimit:${routeIdentifier}:${req.method}`;
         yield middlewares.rateLimit({
             redisClient: redisClient,
             aggregationUnitInSeconds: UNIT_IN_SECONDS,

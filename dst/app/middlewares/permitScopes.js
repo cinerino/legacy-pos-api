@@ -6,7 +6,7 @@ exports.isScopesPermitted = void 0;
  */
 const cinerinoapi = require("@cinerino/sdk");
 const createDebug = require("debug");
-const debug = createDebug('smarttheater-legacy-pos-api:middlewares:permitScopes');
+const debug = createDebug('smarttheater-api:middlewares:permitScopes');
 exports.default = (permittedScopes) => {
     return (req, __, next) => {
         if (process.env.RESOURECE_SERVER_IDENTIFIER === undefined) {

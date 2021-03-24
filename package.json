@@ -24,7 +24,7 @@
     "node-fetch": "^2.6.1",
     "redis": "^2.8.0"
   },
-  "description": "TTTS API Application",
+  "description": "Smart Theater API",
   "devDependencies": {
     "@types/body-parser": "0.0.34",
     "@types/config": "0.0.32",
@@ -57,7 +57,7 @@
   "keywords": [],
   "license": "ISC",
   "main": "dst/server.js",
-  "name": "@smarttheater/legacy-pos-api",
+  "name": "@smarttheater/api",
   "private": true,
   "repository": {},
   "scripts": {

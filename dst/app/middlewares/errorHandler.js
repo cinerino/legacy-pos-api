@@ -7,7 +7,7 @@ const cinerinoapi = require("@cinerino/sdk");
 const createDebug = require("debug");
 const http_status_1 = require("http-status");
 const api_1 = require("../error/api");
-const debug = createDebug('smarttheater-legacy-pos-api:middlewares:errorHandler');
+const debug = createDebug('smarttheater-api:middlewares:errorHandler');
 exports.default = (err, __, res, next) => {
     debug('handling err...', err);
     if (res.headersSent) {

@@ -10,25 +10,38 @@ import rateLimit from '../middlewares/rateLimit';
 import validator from '../middlewares/validator';
 
 export interface IEvent4pos {
-    id: string;
-    name?: {
-        en?: string;
-        ja?: string;
-    };
-    location?: {
-        branchCode?: string;
-        name?: {
-            en?: string;
-            ja?: string;
-        };
-    };
-    endDate?: Date;
-    doorTime?: Date;
-    startDate?: Date;
-    maximumAttendeeCapacity?: number;
-    remainingAttendeeCapacity?: number;
-    eventStatus?: string;
     additionalProperty?: cinerinoapi.factory.chevre.propertyValue.IPropertyValue<string>[];
+    doorTime?: Date;
+    endDate?: Date;
+    eventStatus?: string;
+    id: string;
+    location?: {
+        address?: cinerinoapi.factory.chevre.multilingualString;
+        branchCode?: string;
+        name?: cinerinoapi.factory.chevre.multilingualString;
+    };
+    maximumAttendeeCapacity?: number;
+    offers?: {
+        validFrom?: Date;
+        validThrough?: Date;
+    };
+    remainingAttendeeCapacity?: number;
+    startDate?: Date;
+    superEvent?: {
+        description?: cinerinoapi.factory.chevre.multilingualString;
+        dubLanguage?: {
+            name?: string;
+        };
+        subtitleLanguage?: {
+            name?: string;
+        };
+
+    };
+    workPerformed?: {
+        headline?: string;
+        contentRating?: string;
+        duration?: string;
+    };
 }
 
 export interface ISearchConditions4pos {
@@ -91,9 +104,9 @@ eventsRouter.get(
                         aggregateEntranceGate: 0,
                         aggregateOffer: 0,
                         aggregateReservation: 0,
-                        hasOfferCatalog: 0,
-                        offers: 0,
-                        workPerformed: 0
+                        hasOfferCatalog: 0
+                        // offers: 0,
+                        // workPerformed: 0
                     }
                 }
             };
@@ -111,22 +124,38 @@ export default eventsRouter;
 
 function event2event4pos(event: cinerinoapi.factory.chevre.event.screeningEvent.IEvent): IEvent4pos {
     return {
-        id: event.id,
-        location: {
-            ...(typeof event.location.branchCode === 'string') ? { branchCode: event.location.branchCode } : undefined,
-            ...(typeof event.location.name?.ja === 'string') ? { name: event.location.name } : undefined
-        },
-        endDate: event.endDate,
-        startDate: event.startDate,
-        maximumAttendeeCapacity: event.maximumAttendeeCapacity,
-        remainingAttendeeCapacity: event.remainingAttendeeCapacity,
-        eventStatus: event.eventStatus,
         additionalProperty: (Array.isArray(event.additionalProperty)) ? event.additionalProperty : [],
+        id: event.id,
+        endDate: event.endDate,
+        eventStatus: event.eventStatus,
+        startDate: event.startDate,
         ...(event.doorTime !== undefined) ? { doorTime: event.doorTime } : undefined,
-        ...(typeof event.name?.ja === 'string') ? { name: event.name } : undefined,
         ...(typeof event.maximumAttendeeCapacity === 'number') ? { maximumAttendeeCapacity: event.maximumAttendeeCapacity } : undefined,
         ...(typeof event.remainingAttendeeCapacity === 'number')
             ? { remainingAttendeeCapacity: event.remainingAttendeeCapacity }
-            : undefined
+            : undefined,
+        location: {
+            ...(typeof event.location.address?.ja === 'string') ? { address: event.location.address } : undefined,
+            ...(typeof event.location.branchCode === 'string') ? { branchCode: event.location.branchCode } : undefined,
+            ...(typeof event.location.name?.ja === 'string') ? { name: event.location.name } : undefined
+        },
+        offers: {
+            ...(event.offers?.validFrom !== undefined) ? { validFrom: event.offers.validFrom } : undefined,
+            ...(event.offers?.validThrough !== undefined) ? { validThrough: event.offers.validThrough } : undefined
+        },
+        superEvent: {
+            ...(typeof event.superEvent.description?.ja === 'string') ? { description: event.superEvent.description } : undefined,
+            ...(typeof event.superEvent.dubLanguage?.name === 'string')
+                ? { dubLanguage: { name: event.superEvent.dubLanguage.name } }
+                : undefined,
+            ...(typeof event.superEvent.subtitleLanguage?.name === 'string')
+                ? { subtitleLanguage: { name: event.superEvent.subtitleLanguage.name } }
+                : undefined
+        },
+        workPerformed: {
+            ...(typeof event.workPerformed?.headline === 'string') ? { headline: event.workPerformed.headline } : undefined,
+            ...(typeof event.workPerformed?.contentRating === 'string') ? { contentRating: event.workPerformed.contentRating } : undefined,
+            ...(typeof event.workPerformed?.duration === 'string') ? { duration: event.workPerformed.duration } : undefined
+        }
     };
 }

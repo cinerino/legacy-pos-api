@@ -55,9 +55,9 @@ eventsRouter.get('', permitScopes_1.default(['pos']), ...[
                 aggregateEntranceGate: 0,
                 aggregateOffer: 0,
                 aggregateReservation: 0,
-                hasOfferCatalog: 0,
-                offers: 0,
-                workPerformed: 0
+                hasOfferCatalog: 0
+                // offers: 0,
+                // workPerformed: 0
             }
         });
         const searchResult = yield eventService.search(searchConditions);
@@ -69,8 +69,12 @@ eventsRouter.get('', permitScopes_1.default(['pos']), ...[
 }));
 exports.default = eventsRouter;
 function event2event4pos(event) {
-    var _a, _b;
-    return Object.assign(Object.assign(Object.assign(Object.assign({ id: event.id, location: Object.assign(Object.assign({}, (typeof event.location.branchCode === 'string') ? { branchCode: event.location.branchCode } : undefined), (typeof ((_a = event.location.name) === null || _a === void 0 ? void 0 : _a.ja) === 'string') ? { name: event.location.name } : undefined), endDate: event.endDate, startDate: event.startDate, maximumAttendeeCapacity: event.maximumAttendeeCapacity, remainingAttendeeCapacity: event.remainingAttendeeCapacity, eventStatus: event.eventStatus, additionalProperty: (Array.isArray(event.additionalProperty)) ? event.additionalProperty : [] }, (event.doorTime !== undefined) ? { doorTime: event.doorTime } : undefined), (typeof ((_b = event.name) === null || _b === void 0 ? void 0 : _b.ja) === 'string') ? { name: event.name } : undefined), (typeof event.maximumAttendeeCapacity === 'number') ? { maximumAttendeeCapacity: event.maximumAttendeeCapacity } : undefined), (typeof event.remainingAttendeeCapacity === 'number')
+    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k;
+    return Object.assign(Object.assign(Object.assign(Object.assign({ additionalProperty: (Array.isArray(event.additionalProperty)) ? event.additionalProperty : [], id: event.id, endDate: event.endDate, eventStatus: event.eventStatus, startDate: event.startDate }, (event.doorTime !== undefined) ? { doorTime: event.doorTime } : undefined), (typeof event.maximumAttendeeCapacity === 'number') ? { maximumAttendeeCapacity: event.maximumAttendeeCapacity } : undefined), (typeof event.remainingAttendeeCapacity === 'number')
         ? { remainingAttendeeCapacity: event.remainingAttendeeCapacity }
-        : undefined);
+        : undefined), { location: Object.assign(Object.assign(Object.assign({}, (typeof ((_a = event.location.address) === null || _a === void 0 ? void 0 : _a.ja) === 'string') ? { address: event.location.address } : undefined), (typeof event.location.branchCode === 'string') ? { branchCode: event.location.branchCode } : undefined), (typeof ((_b = event.location.name) === null || _b === void 0 ? void 0 : _b.ja) === 'string') ? { name: event.location.name } : undefined), offers: Object.assign(Object.assign({}, (((_c = event.offers) === null || _c === void 0 ? void 0 : _c.validFrom) !== undefined) ? { validFrom: event.offers.validFrom } : undefined), (((_d = event.offers) === null || _d === void 0 ? void 0 : _d.validThrough) !== undefined) ? { validThrough: event.offers.validThrough } : undefined), superEvent: Object.assign(Object.assign(Object.assign({}, (typeof ((_e = event.superEvent.description) === null || _e === void 0 ? void 0 : _e.ja) === 'string') ? { description: event.superEvent.description } : undefined), (typeof ((_f = event.superEvent.dubLanguage) === null || _f === void 0 ? void 0 : _f.name) === 'string')
+            ? { dubLanguage: { name: event.superEvent.dubLanguage.name } }
+            : undefined), (typeof ((_g = event.superEvent.subtitleLanguage) === null || _g === void 0 ? void 0 : _g.name) === 'string')
+            ? { subtitleLanguage: { name: event.superEvent.subtitleLanguage.name } }
+            : undefined), workPerformed: Object.assign(Object.assign(Object.assign({}, (typeof ((_h = event.workPerformed) === null || _h === void 0 ? void 0 : _h.headline) === 'string') ? { headline: event.workPerformed.headline } : undefined), (typeof ((_j = event.workPerformed) === null || _j === void 0 ? void 0 : _j.contentRating) === 'string') ? { contentRating: event.workPerformed.contentRating } : undefined), (typeof ((_k = event.workPerformed) === null || _k === void 0 ? void 0 : _k.duration) === 'string') ? { duration: event.workPerformed.duration } : undefined) });
 }

@@ -61,7 +61,9 @@ returnOrderTransactionsRouter.post('/confirm', permitScopes_1.default(['pos']), 
                 .withMessage(() => 'required')
         ]
     ])
-], validator_1.default, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+], validator_1.default, 
+// tslint:disable-next-line:max-func-body-length
+(req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     var _a, _b, _c;
     try {
         const now = moment();
@@ -76,17 +78,28 @@ returnOrderTransactionsRouter.post('/confirm', permitScopes_1.default(['pos']), 
                 throw new cinerinoapi.factory.errors.ArgumentNull('customer.telephone');
             }
         }
+        const deliveryService = new cinerinoapi.service.Delivery({
+            auth: req.authClient,
+            endpoint: process.env.CINERINO_API_ENDPOINT,
+            project: { id: req.project.id }
+        });
+        const orderService = new cinerinoapi.service.Order({
+            auth: req.authClient,
+            endpoint: process.env.CINERINO_API_ENDPOINT,
+            project: { id: req.project.id }
+        });
         const returnOrderService = new cinerinoapi.service.transaction.ReturnOrder({
             auth: req.authClient,
             endpoint: process.env.CINERINO_API_ENDPOINT,
             project: { id: req.project.id }
         });
+        let order;
         let returnableOrder;
         if (typeof req.body.performance_day === 'string' && req.body.performance_day.length > 0) {
             // 注文取得
             const confirmationNumber = `${req.body.performance_day}${req.body.payment_no}`;
             const key = `${placeOrder_1.ORDERS_KEY_PREFIX}${confirmationNumber}`;
-            const order = yield new Promise((resolve, reject) => {
+            order = yield new Promise((resolve, reject) => {
                 redisClient.get(key, (err, result) => {
                     if (err !== null) {
                         reject(err);
@@ -101,15 +114,26 @@ returnOrderTransactionsRouter.post('/confirm', permitScopes_1.default(['pos']), 
                     }
                 });
             });
-            returnableOrder = {
-                orderNumber: String(order.orderNumber),
-                customer: { telephone: String((_b = order.customer) === null || _b === void 0 ? void 0 : _b.telephone) }
-            };
         }
         if (typeof req.body.orderNumber === 'string' && req.body.orderNumber.length > 0) {
-            returnableOrder = {
+            order = yield orderService.findOneByOrderNumberAndSomething({
                 orderNumber: String(req.body.orderNumber),
-                customer: { telephone: String((_c = req.body.customer) === null || _c === void 0 ? void 0 : _c.telephone) }
+                customer: { telephone: String((_b = req.body.customer) === null || _b === void 0 ? void 0 : _b.telephone) }
+            });
+        }
+        if (order !== undefined) {
+            // 注文配送
+            if (order.orderStatus !== cinerinoapi.factory.orderStatus.OrderDelivered) {
+                yield deliveryService.sendOrder({
+                    object: {
+                        orderNumber: order.orderNumber,
+                        confirmationNumber: order.confirmationNumber
+                    }
+                });
+            }
+            returnableOrder = {
+                orderNumber: String(order.orderNumber),
+                customer: { telephone: String((_c = order.customer) === null || _c === void 0 ? void 0 : _c.telephone) }
             };
         }
         if (returnableOrder === undefined) {

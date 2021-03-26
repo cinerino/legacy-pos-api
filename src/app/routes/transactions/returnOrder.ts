@@ -62,6 +62,7 @@ returnOrderTransactionsRouter.post(
         ])
     ],
     validator,
+    // tslint:disable-next-line:max-func-body-length
     async (req, res, next) => {
         try {
             const now = moment();
@@ -77,19 +78,30 @@ returnOrderTransactionsRouter.post(
                 }
             }
 
+            const deliveryService = new cinerinoapi.service.Delivery({
+                auth: req.authClient,
+                endpoint: <string>process.env.CINERINO_API_ENDPOINT,
+                project: { id: req.project.id }
+            });
+            const orderService = new cinerinoapi.service.Order({
+                auth: req.authClient,
+                endpoint: <string>process.env.CINERINO_API_ENDPOINT,
+                project: { id: req.project.id }
+            });
             const returnOrderService = new cinerinoapi.service.transaction.ReturnOrder({
                 auth: req.authClient,
                 endpoint: <string>process.env.CINERINO_API_ENDPOINT,
                 project: { id: req.project.id }
             });
 
+            let order: cinerinoapi.factory.order.IOrder | undefined;
             let returnableOrder: cinerinoapi.factory.transaction.returnOrder.IReturnableOrder | undefined;
 
             if (typeof req.body.performance_day === 'string' && req.body.performance_day.length > 0) {
                 // 注文取得
                 const confirmationNumber = `${req.body.performance_day}${req.body.payment_no}`;
                 const key = `${ORDERS_KEY_PREFIX}${confirmationNumber}`;
-                const order = await new Promise<cinerinoapi.factory.order.IOrder>((resolve, reject) => {
+                order = await new Promise<cinerinoapi.factory.order.IOrder>((resolve, reject) => {
                     redisClient.get(key, (err, result) => {
                         if (err !== null) {
                             reject(err);
@@ -102,16 +114,29 @@ returnOrderTransactionsRouter.post(
                         }
                     });
                 });
-                returnableOrder = {
-                    orderNumber: String(order.orderNumber),
-                    customer: { telephone: String(order.customer?.telephone) }
-                };
             }
 
             if (typeof req.body.orderNumber === 'string' && req.body.orderNumber.length > 0) {
-                returnableOrder = {
+                order = await orderService.findOneByOrderNumberAndSomething({
                     orderNumber: String(req.body.orderNumber),
                     customer: { telephone: String(req.body.customer?.telephone) }
+                });
+            }
+
+            if (order !== undefined) {
+                // 注文配送
+                if (order.orderStatus !== cinerinoapi.factory.orderStatus.OrderDelivered) {
+                    await deliveryService.sendOrder({
+                        object: {
+                            orderNumber: order.orderNumber,
+                            confirmationNumber: order.confirmationNumber
+                        }
+                    });
+                }
+
+                returnableOrder = {
+                    orderNumber: String(order.orderNumber),
+                    customer: { telephone: String(order.customer?.telephone) }
                 };
             }
 

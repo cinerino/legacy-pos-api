@@ -395,39 +395,52 @@ async function publishCode(req: Request, order: cinerinoapi.factory.order.IOrder
         project: { id: req.project.id }
     });
 
-    try {
-        // まず注文作成(非同期処理が間に合わない可能性ありなので)
-        await orderService.placeOrder({
-            object: {
-                orderNumber: order.orderNumber,
-                confirmationNumber: order.confirmationNumber
-            },
-            purpose: {
-                typeOf: cinerinoapi.factory.transactionType.PlaceOrder,
-                id: transactionId
-            }
-        });
-    } catch (error) {
-        // tslint:disable-next-line:no-console
-        console.error(error);
+    let tryCount = 0;
+    const MAX_TRY_COUNT = 3;
+    while (tryCount < MAX_TRY_COUNT) {
+        try {
+            tryCount += 1;
+
+            // まず注文作成(非同期処理が間に合わない可能性ありなので)
+            await orderService.placeOrder({
+                object: {
+                    orderNumber: order.orderNumber,
+                    confirmationNumber: order.confirmationNumber
+                },
+                purpose: {
+                    typeOf: cinerinoapi.factory.transactionType.PlaceOrder,
+                    id: transactionId
+                }
+            });
+            break;
+        } catch (error) {
+            // tslint:disable-next-line:no-console
+            console.error(error);
+        }
     }
 
     // 注文承認
     let code: string | undefined;
-    try {
-        const authorizeOrderResult = await orderService.authorize({
-            object: {
-                orderNumber: order.orderNumber,
-                customer: { telephone: order.customer.telephone }
-            },
-            result: {
-                expiresInSeconds: CODE_EXPIRES_IN_SECONDS
-            }
-        });
-        code = authorizeOrderResult.code;
-    } catch (error) {
-        // tslint:disable-next-line:no-console
-        console.error(error);
+    let tryCount4code = 0;
+    while (tryCount4code < MAX_TRY_COUNT) {
+        try {
+            tryCount4code += 1;
+
+            const authorizeOrderResult = await orderService.authorize({
+                object: {
+                    orderNumber: order.orderNumber,
+                    customer: { telephone: order.customer.telephone }
+                },
+                result: {
+                    expiresInSeconds: CODE_EXPIRES_IN_SECONDS
+                }
+            });
+            code = authorizeOrderResult.code;
+            break;
+        } catch (error) {
+            // tslint:disable-next-line:no-console
+            console.error(error);
+        }
     }
 
     return code;

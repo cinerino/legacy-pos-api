@@ -126,12 +126,24 @@ returnOrderTransactionsRouter.post(
             if (order !== undefined) {
                 // 注文配送
                 if (order.orderStatus !== cinerinoapi.factory.orderStatus.OrderDelivered) {
-                    await deliveryService.sendOrder({
-                        object: {
-                            orderNumber: order.orderNumber,
-                            confirmationNumber: order.confirmationNumber
+                    let tryCount = 0;
+                    const MAX_TRY_COUNT = 3;
+                    while (tryCount < MAX_TRY_COUNT) {
+                        try {
+                            tryCount += 1;
+
+                            await deliveryService.sendOrder({
+                                object: {
+                                    orderNumber: order.orderNumber,
+                                    confirmationNumber: order.confirmationNumber
+                                }
+                            });
+                            break;
+                        } catch (error) {
+                            // tslint:disable-next-line:no-console
+                            console.error(error);
                         }
-                    });
+                    }
                 }
 
                 returnableOrder = {

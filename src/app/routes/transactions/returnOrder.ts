@@ -124,6 +124,11 @@ returnOrderTransactionsRouter.post(
             }
 
             if (order !== undefined) {
+                // 注文クライアントと返品クライアントの同一性を確認
+                if (order.customer?.id !== req.user.client_id) {
+                    throw new cinerinoapi.factory.errors.Argument('orderNumber', 'client not matched');
+                }
+
                 // 注文配送
                 if (order.orderStatus !== cinerinoapi.factory.orderStatus.OrderDelivered) {
                     let tryCount = 0;

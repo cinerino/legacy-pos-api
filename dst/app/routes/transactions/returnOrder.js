@@ -64,7 +64,7 @@ returnOrderTransactionsRouter.post('/confirm', permitScopes_1.default(['pos']), 
 ], validator_1.default, 
 // tslint:disable-next-line:max-func-body-length
 (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a, _b, _c;
+    var _a, _b, _c, _d;
     try {
         const now = moment();
         const useNewReturnOrderParams = USE_NEW_RETURN_ORDER_PARAMS_FROM instanceof Date
@@ -122,6 +122,10 @@ returnOrderTransactionsRouter.post('/confirm', permitScopes_1.default(['pos']), 
             });
         }
         if (order !== undefined) {
+            // 注文クライアントと返品クライアントの同一性を確認
+            if (((_c = order.customer) === null || _c === void 0 ? void 0 : _c.id) !== req.user.client_id) {
+                throw new cinerinoapi.factory.errors.Argument('orderNumber', 'client not matched');
+            }
             // 注文配送
             if (order.orderStatus !== cinerinoapi.factory.orderStatus.OrderDelivered) {
                 let tryCount = 0;
@@ -145,7 +149,7 @@ returnOrderTransactionsRouter.post('/confirm', permitScopes_1.default(['pos']), 
             }
             returnableOrder = {
                 orderNumber: String(order.orderNumber),
-                customer: { telephone: String((_c = order.customer) === null || _c === void 0 ? void 0 : _c.telephone) }
+                customer: { telephone: String((_d = order.customer) === null || _d === void 0 ? void 0 : _d.telephone) }
             };
         }
         if (returnableOrder === undefined) {

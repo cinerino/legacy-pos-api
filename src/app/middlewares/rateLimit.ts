@@ -18,9 +18,7 @@ const redisClient = new ioredis({
 export default async (req: Request, res: Response, next: NextFunction) => {
     try {
         const routeIdentifier = `${req.baseUrl}${req.path}`;
-        const rateLimitScope = (req.project !== undefined && req.project !== null && typeof req.project.id === 'string')
-            ? `smarttheater-api:${req.project.id}:rateLimit:${routeIdentifier}:${req.method}`
-            : `smarttheater-api:rateLimit:${routeIdentifier}:${req.method}`;
+        const rateLimitScope = `smarttheater-api:${String(req.project?.id)}:rateLimit:${routeIdentifier}:${req.method}`;
 
         await middlewares.rateLimit({
             redisClient: redisClient,

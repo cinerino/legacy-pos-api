@@ -5,6 +5,7 @@ import * as cinerinoapi from '@cinerino/sdk';
 import * as express from 'express';
 
 import eventsRouter from '../events';
+import movieRouter from '../movie';
 import performancesRouter from '../performances';
 import placeOrderTransactionsRouter from '../transactions/placeOrder';
 import returnOrderTransactionsRouter from '../transactions/returnOrder';
@@ -22,6 +23,7 @@ projectDetailRouter.use((req, _, next) => {
     next();
 });
 
+projectDetailRouter.use('/creativeWorks/movie', movieRouter);
 projectDetailRouter.use('/events', eventsRouter);
 projectDetailRouter.use('/performances', performancesRouter);
 projectDetailRouter.use('/transactions/placeOrder', placeOrderTransactionsRouter);

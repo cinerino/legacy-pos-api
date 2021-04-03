@@ -15,6 +15,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 - USE_NEW_RETURN_ORDER_PARAMS_FROM設定を追加
 - 返品取引開始前の注文状態確認処理を追加
 - 返品取引開始前に注文クライアントと返品クライアントの同一性を確認
+- aws.cognito.signin.user.adminスコープへの許可を廃止
 
 ### Deprecated
 

@@ -23,7 +23,9 @@ eventsRouter.use(rateLimit_1.default);
 /**
  * イベント検索
  */
-eventsRouter.get('', permitScopes_1.default(['pos']), ...[
+eventsRouter.get('', 
+// permitScopes(['pos']),
+permitScopes_1.default([]), ...[
     express_validator_1.query('limit')
         .optional()
         .isInt()

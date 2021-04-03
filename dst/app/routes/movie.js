@@ -23,7 +23,9 @@ movieRouter.use(rateLimit_1.default);
 /**
  * コンテンツ検索
  */
-movieRouter.get('', permitScopes_1.default(['pos']), ...[
+movieRouter.get('', 
+// permitScopes(['pos']),
+permitScopes_1.default([]), ...[
     express_validator_1.query('limit')
         .optional()
         .isInt()

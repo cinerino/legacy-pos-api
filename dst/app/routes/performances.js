@@ -23,7 +23,9 @@ performancesRouter.use(rateLimit_1.default);
 /**
  * イベント検索
  */
-performancesRouter.get('', permitScopes_1.default(['pos']), ...[], validator_1.default, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+performancesRouter.get('', 
+// permitScopes(['pos']),
+permitScopes_1.default([]), ...[], validator_1.default, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const eventService = new cinerinoapi.service.Event({
             endpoint: process.env.CINERINO_API_ENDPOINT,

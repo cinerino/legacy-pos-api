@@ -17,6 +17,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 - 返品取引開始前に注文クライアントと返品クライアントの同一性を確認
 - aws.cognito.signin.user.adminスコープへの許可を廃止
 - cinerinoのsomethingスコープを許可するように設定
+- posスコープへの許可を廃止
 
 ### Deprecated
 

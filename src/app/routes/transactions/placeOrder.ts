@@ -63,7 +63,8 @@ placeOrderTransactionsRouter.use(rateLimit);
 
 placeOrderTransactionsRouter.post(
     '/start',
-    permitScopes(['pos']),
+    // permitScopes(['pos']),
+    permitScopes([]),
     ...[
         body('expires')
             .not()
@@ -137,7 +138,8 @@ placeOrderTransactionsRouter.post(
 // tslint:disable-next-line:use-default-type-parameter
 placeOrderTransactionsRouter.put<ParamsDictionary>(
     '/:transactionId/customerContact',
-    permitScopes(['pos']),
+    // permitScopes(['pos']),
+    permitScopes([]),
     ...[
         body('last_name')
             .not()
@@ -200,7 +202,8 @@ placeOrderTransactionsRouter.put<ParamsDictionary>(
  */
 placeOrderTransactionsRouter.post(
     '/:transactionId/actions/authorize/seatReservation',
-    permitScopes(['pos']),
+    // permitScopes(['pos']),
+    permitScopes([]),
     validator,
     async (req, res, next) => {
         try {
@@ -253,7 +256,8 @@ placeOrderTransactionsRouter.post(
  */
 placeOrderTransactionsRouter.delete(
     '/:transactionId/actions/authorize/seatReservation/:actionId',
-    permitScopes(['pos']),
+    // permitScopes(['pos']),
+    permitScopes([]),
     validator,
     async (req, res, next) => {
         try {
@@ -293,7 +297,8 @@ placeOrderTransactionsRouter.delete(
 
 placeOrderTransactionsRouter.post(
     '/:transactionId/confirm',
-    permitScopes(['pos']),
+    // permitScopes(['pos']),
+    permitScopes([]),
     validator,
     async (req, res, next) => {
         try {

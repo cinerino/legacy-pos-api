@@ -34,7 +34,8 @@ movieRouter.use(rateLimit);
  */
 movieRouter.get(
     '',
-    permitScopes(['pos']),
+    // permitScopes(['pos']),
+    permitScopes([]),
     ...[
         query('limit')
             .optional()

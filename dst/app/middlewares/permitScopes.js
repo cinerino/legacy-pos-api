@@ -7,6 +7,7 @@ exports.isScopesPermitted = void 0;
 const cinerinoapi = require("@cinerino/sdk");
 const createDebug = require("debug");
 const debug = createDebug('smarttheater-api:middlewares:permitScopes');
+const SCOPE_ANY_RESOURCE = 'something';
 exports.default = (permittedScopes) => {
     return (req, __, next) => {
         if (process.env.RESOURECE_SERVER_IDENTIFIER === undefined) {
@@ -17,7 +18,9 @@ exports.default = (permittedScopes) => {
         // ドメインつきのスコープリストも許容するように変更
         const permittedScopesWithResourceServerIdentifier = [
             ...permittedScopes.map((permittedScope) => `${process.env.RESOURECE_SERVER_IDENTIFIER}/${permittedScope}`),
-            ...permittedScopes.map((permittedScope) => `${process.env.RESOURECE_SERVER_IDENTIFIER}/auth/${permittedScope}`)
+            ...permittedScopes.map((permittedScope) => `${process.env.RESOURECE_SERVER_IDENTIFIER}/auth/${permittedScope}`),
+            // SCOPE_ANY_RESOURCEについてはすべて許可
+            `${process.env.RESOURECE_SERVER_IDENTIFIER}/${SCOPE_ANY_RESOURCE}`
         ];
         debug('permittedScopesWithResourceServerIdentifier:', permittedScopesWithResourceServerIdentifier);
         // スコープチェック

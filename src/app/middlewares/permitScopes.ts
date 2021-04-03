@@ -7,6 +7,8 @@ import { NextFunction, Request, Response } from 'express';
 
 const debug = createDebug('smarttheater-api:middlewares:permitScopes');
 
+const SCOPE_ANY_RESOURCE = 'something';
+
 /**
  * スコープインターフェース
  */
@@ -25,7 +27,9 @@ export default (permittedScopes: IScope[]) => {
         // ドメインつきのスコープリストも許容するように変更
         const permittedScopesWithResourceServerIdentifier = [
             ...permittedScopes.map((permittedScope) => `${process.env.RESOURECE_SERVER_IDENTIFIER}/${permittedScope}`),
-            ...permittedScopes.map((permittedScope) => `${process.env.RESOURECE_SERVER_IDENTIFIER}/auth/${permittedScope}`)
+            ...permittedScopes.map((permittedScope) => `${process.env.RESOURECE_SERVER_IDENTIFIER}/auth/${permittedScope}`),
+            // SCOPE_ANY_RESOURCEについてはすべて許可
+            `${process.env.RESOURECE_SERVER_IDENTIFIER}/${SCOPE_ANY_RESOURCE}`
         ];
         debug('permittedScopesWithResourceServerIdentifier:', permittedScopesWithResourceServerIdentifier);
 

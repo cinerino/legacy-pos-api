@@ -47,8 +47,15 @@ export interface IEvent4pos {
 export interface ISearchConditions4pos {
     page?: number;
     limit?: number;
+    offers?: {
+        validFrom?: Date;
+        validThrough?: Date;
+        availableFrom?: Date;
+        availableThrough?: Date;
+    };
     startFrom?: Date;
     startThrough?: Date;
+    superEvent?: { locationBranchCodes?: string[] };
 }
 
 const eventsRouter = express.Router();
@@ -70,6 +77,22 @@ eventsRouter.get(
             .optional()
             .isInt()
             .toInt(),
+        query('offers.availableFrom')
+            .optional()
+            .isISO8601()
+            .toDate(),
+        query('offers.availableThrough')
+            .optional()
+            .isISO8601()
+            .toDate(),
+        query('offers.validFrom')
+            .optional()
+            .isISO8601()
+            .toDate(),
+        query('offers.validThrough')
+            .optional()
+            .isISO8601()
+            .toDate(),
         query('startFrom')
             .optional()
             .isISO8601()
@@ -91,14 +114,25 @@ eventsRouter.get(
 
             const params = <ISearchConditions4pos>req.query;
 
+            const superEventLocationBranchCodes = params.superEvent?.locationBranchCodes;
             const searchConditions: cinerinoapi.factory.chevre.event.screeningEvent.ISearchConditions = {
                 // tslint:disable-next-line:no-magic-numbers
                 limit: (typeof params.limit === 'number') ? Math.min(params.limit, 100) : 100,
                 page: (typeof params.page === 'number') ? Math.max(params.page, 1) : 1,
                 sort: { startDate: 1 },
                 typeOf: cinerinoapi.factory.chevre.eventType.ScreeningEvent,
-                startFrom: params.startFrom,
-                startThrough: params.startThrough,
+                eventStatuses: [cinerinoapi.factory.chevre.eventStatusType.EventScheduled],
+                offers: {
+                    ...(params.offers?.availableFrom instanceof Date) ? { availableFrom: params.offers.availableFrom } : undefined,
+                    ...(params.offers?.availableThrough instanceof Date) ? { availableThrough: params.offers.availableThrough } : undefined,
+                    ...(params.offers?.validFrom instanceof Date) ? { validFrom: params.offers.validFrom } : undefined,
+                    ...(params.offers?.validThrough instanceof Date) ? { validThrough: params.offers.validThrough } : undefined
+                },
+                superEvent: {
+                    ...(Array.isArray(superEventLocationBranchCodes)) ? { locationBranchCodes: superEventLocationBranchCodes } : undefined
+                },
+                ...(params.startFrom instanceof Date) ? { startFrom: params.startFrom } : undefined,
+                ...(params.startThrough instanceof Date) ? { startThrough: params.startThrough } : undefined,
                 ...{
                     $projection: {
                         aggregateEntranceGate: 0,

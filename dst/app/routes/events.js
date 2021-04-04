@@ -32,6 +32,22 @@ eventsRouter.get('', permitScopes_1.default([]), ...[
         .optional()
         .isInt()
         .toInt(),
+    express_validator_1.query('offers.availableFrom')
+        .optional()
+        .isISO8601()
+        .toDate(),
+    express_validator_1.query('offers.availableThrough')
+        .optional()
+        .isISO8601()
+        .toDate(),
+    express_validator_1.query('offers.validFrom')
+        .optional()
+        .isISO8601()
+        .toDate(),
+    express_validator_1.query('offers.validThrough')
+        .optional()
+        .isISO8601()
+        .toDate(),
     express_validator_1.query('startFrom')
         .optional()
         .isISO8601()
@@ -41,6 +57,7 @@ eventsRouter.get('', permitScopes_1.default([]), ...[
         .isISO8601()
         .toDate()
 ], ...[], validator_1.default, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a, _b, _c, _d, _e;
     try {
         const eventService = new cinerinoapi.service.Event({
             endpoint: process.env.CINERINO_API_ENDPOINT,
@@ -48,9 +65,10 @@ eventsRouter.get('', permitScopes_1.default([]), ...[
             auth: req.authClient
         });
         const params = req.query;
-        const searchConditions = Object.assign({ 
+        const superEventLocationBranchCodes = (_a = params.superEvent) === null || _a === void 0 ? void 0 : _a.locationBranchCodes;
+        const searchConditions = Object.assign(Object.assign(Object.assign({ 
             // tslint:disable-next-line:no-magic-numbers
-            limit: (typeof params.limit === 'number') ? Math.min(params.limit, 100) : 100, page: (typeof params.page === 'number') ? Math.max(params.page, 1) : 1, sort: { startDate: 1 }, typeOf: cinerinoapi.factory.chevre.eventType.ScreeningEvent, startFrom: params.startFrom, startThrough: params.startThrough }, {
+            limit: (typeof params.limit === 'number') ? Math.min(params.limit, 100) : 100, page: (typeof params.page === 'number') ? Math.max(params.page, 1) : 1, sort: { startDate: 1 }, typeOf: cinerinoapi.factory.chevre.eventType.ScreeningEvent, eventStatuses: [cinerinoapi.factory.chevre.eventStatusType.EventScheduled], offers: Object.assign(Object.assign(Object.assign(Object.assign({}, (((_b = params.offers) === null || _b === void 0 ? void 0 : _b.availableFrom) instanceof Date) ? { availableFrom: params.offers.availableFrom } : undefined), (((_c = params.offers) === null || _c === void 0 ? void 0 : _c.availableThrough) instanceof Date) ? { availableThrough: params.offers.availableThrough } : undefined), (((_d = params.offers) === null || _d === void 0 ? void 0 : _d.validFrom) instanceof Date) ? { validFrom: params.offers.validFrom } : undefined), (((_e = params.offers) === null || _e === void 0 ? void 0 : _e.validThrough) instanceof Date) ? { validThrough: params.offers.validThrough } : undefined), superEvent: Object.assign({}, (Array.isArray(superEventLocationBranchCodes)) ? { locationBranchCodes: superEventLocationBranchCodes } : undefined) }, (params.startFrom instanceof Date) ? { startFrom: params.startFrom } : undefined), (params.startThrough instanceof Date) ? { startThrough: params.startThrough } : undefined), {
             $projection: {
                 aggregateEntranceGate: 0,
                 aggregateOffer: 0,

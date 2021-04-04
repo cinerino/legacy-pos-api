@@ -18,6 +18,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 - aws.cognito.signin.user.adminスコープへの許可を廃止
 - cinerinoのsomethingスコープを許可するように設定
 - posスコープへの許可を廃止
+- イベント検索条件拡張
 
 ### Deprecated
 

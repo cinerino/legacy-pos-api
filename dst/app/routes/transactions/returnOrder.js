@@ -37,9 +37,7 @@ returnOrderTransactionsRouter.use(rateLimit_1.default);
 /**
  * 上映日と購入番号で返品
  */
-returnOrderTransactionsRouter.post('/confirm', 
-// permitScopes(['pos']),
-permitScopes_1.default([]), ...[
+returnOrderTransactionsRouter.post('/confirm', permitScopes_1.default([]), ...[
     express_validator_1.oneOf([
         [
             // 廃止予定↓

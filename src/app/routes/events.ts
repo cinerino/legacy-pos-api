@@ -60,7 +60,6 @@ eventsRouter.use(rateLimit);
  */
 eventsRouter.get(
     '',
-    // permitScopes(['pos']),
     permitScopes([]),
     ...[
         query('limit')

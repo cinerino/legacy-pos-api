@@ -19,7 +19,6 @@ performancesRouter.use(rateLimit);
  */
 performancesRouter.get(
     '',
-    // permitScopes(['pos']),
     permitScopes([]),
     ...[],
     validator,

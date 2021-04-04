@@ -61,9 +61,7 @@ function publishWaiterScope(params) {
 }
 const placeOrderTransactionsRouter = express_1.Router();
 placeOrderTransactionsRouter.use(rateLimit_1.default);
-placeOrderTransactionsRouter.post('/start', 
-// permitScopes(['pos']),
-permitScopes_1.default([]), ...[
+placeOrderTransactionsRouter.post('/start', permitScopes_1.default([]), ...[
     express_validator_1.body('expires')
         .not()
         .isEmpty()
@@ -127,9 +125,7 @@ permitScopes_1.default([]), ...[
  * 購入者情報を変更する
  */
 // tslint:disable-next-line:use-default-type-parameter
-placeOrderTransactionsRouter.put('/:transactionId/customerContact', 
-// permitScopes(['pos']),
-permitScopes_1.default([]), ...[
+placeOrderTransactionsRouter.put('/:transactionId/customerContact', permitScopes_1.default([]), ...[
     express_validator_1.body('last_name')
         .not()
         .isEmpty()
@@ -170,9 +166,7 @@ permitScopes_1.default([]), ...[
 /**
  * 座席仮予約
  */
-placeOrderTransactionsRouter.post('/:transactionId/actions/authorize/seatReservation', 
-// permitScopes(['pos']),
-permitScopes_1.default([]), validator_1.default, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+placeOrderTransactionsRouter.post('/:transactionId/actions/authorize/seatReservation', permitScopes_1.default([]), validator_1.default, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         if (!Array.isArray(req.body.offers)) {
             req.body.offers = [];
@@ -217,9 +211,7 @@ permitScopes_1.default([]), validator_1.default, (req, res, next) => __awaiter(v
 /**
  * 座席仮予約削除
  */
-placeOrderTransactionsRouter.delete('/:transactionId/actions/authorize/seatReservation/:actionId', 
-// permitScopes(['pos']),
-permitScopes_1.default([]), validator_1.default, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+placeOrderTransactionsRouter.delete('/:transactionId/actions/authorize/seatReservation/:actionId', permitScopes_1.default([]), validator_1.default, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const placeOrderService = new cinerinoapi.service.transaction.PlaceOrder({
             auth: req.authClient,
@@ -252,9 +244,7 @@ permitScopes_1.default([]), validator_1.default, (req, res, next) => __awaiter(v
         next(error);
     }
 }));
-placeOrderTransactionsRouter.post('/:transactionId/confirm', 
-// permitScopes(['pos']),
-permitScopes_1.default([]), validator_1.default, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+placeOrderTransactionsRouter.post('/:transactionId/confirm', permitScopes_1.default([]), validator_1.default, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     var _b, _c;
     try {
         // クライアントがPOSの場合、決済方法承認アクションを自動生成

@@ -35,7 +35,6 @@ returnOrderTransactionsRouter.use(rateLimit);
  */
 returnOrderTransactionsRouter.post(
     '/confirm',
-    // permitScopes(['pos']),
     permitScopes([]),
     ...[
         oneOf([

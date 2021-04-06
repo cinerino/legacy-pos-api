@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 ### Added
 
 - コンテンツ検索を追加
+- 施設コンテンツ検索を追加
 
 ### Changed
 

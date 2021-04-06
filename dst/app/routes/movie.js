@@ -31,7 +31,15 @@ movieRouter.get('', permitScopes_1.default([]), ...[
     express_validator_1.query('page')
         .optional()
         .isInt()
-        .toInt()
+        .toInt(),
+    express_validator_1.query('datePublishedFrom')
+        .optional()
+        .isISO8601()
+        .toDate(),
+    express_validator_1.query('datePublishedThrough')
+        .optional()
+        .isISO8601()
+        .toDate()
 ], ...[], validator_1.default, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const creativeWorkService = new cinerinoapi.service.CreativeWork({
@@ -40,9 +48,9 @@ movieRouter.get('', permitScopes_1.default([]), ...[
             auth: req.authClient
         });
         const params = req.query;
-        const searchConditions = Object.assign({ 
+        const searchConditions = Object.assign(Object.assign(Object.assign({ 
             // tslint:disable-next-line:no-magic-numbers
-            limit: (typeof params.limit === 'number') ? Math.min(params.limit, 100) : 100, page: (typeof params.page === 'number') ? Math.max(params.page, 1) : 1, sort: { identifier: 1 } }, {
+            limit: (typeof params.limit === 'number') ? Math.min(params.limit, 100) : 100, page: (typeof params.page === 'number') ? Math.max(params.page, 1) : 1, sort: { identifier: 1 } }, (params.datePublishedFrom instanceof Date) ? { datePublishedFrom: params.datePublishedFrom } : undefined), (params.datePublishedThrough instanceof Date) ? { datePublishedThrough: params.datePublishedThrough } : undefined), {
         // $projection: {
         //     aggregateEntranceGate: 0,
         //     aggregateOffer: 0,

@@ -21,8 +21,8 @@ export interface IMovie4pos {
 export interface ISearchConditions4pos {
     page?: number;
     limit?: number;
-    startFrom?: Date;
-    startThrough?: Date;
+    datePublishedFrom?: Date;
+    datePublishedThrough?: Date;
 }
 
 const movieRouter = express.Router();
@@ -43,7 +43,15 @@ movieRouter.get(
         query('page')
             .optional()
             .isInt()
-            .toInt()
+            .toInt(),
+        query('datePublishedFrom')
+            .optional()
+            .isISO8601()
+            .toDate(),
+        query('datePublishedThrough')
+            .optional()
+            .isISO8601()
+            .toDate()
     ],
     ...[],
     validator,
@@ -62,6 +70,8 @@ movieRouter.get(
                 limit: (typeof params.limit === 'number') ? Math.min(params.limit, 100) : 100,
                 page: (typeof params.page === 'number') ? Math.max(params.page, 1) : 1,
                 sort: { identifier: 1 },
+                ...(params.datePublishedFrom instanceof Date) ? { datePublishedFrom: params.datePublishedFrom } : undefined,
+                ...(params.datePublishedThrough instanceof Date) ? { datePublishedThrough: params.datePublishedThrough } : undefined,
                 ...{
                     // $projection: {
                     //     aggregateEntranceGate: 0,

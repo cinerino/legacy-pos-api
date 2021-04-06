@@ -29,6 +29,7 @@ export interface IEvent4pos {
     remainingAttendeeCapacity?: number;
     startDate?: Date;
     superEvent?: {
+        id?: string;
         description?: cinerinoapi.factory.chevre.multilingualString;
         dubLanguage?: {
             name?: string;
@@ -181,6 +182,7 @@ function event2event4pos(event: cinerinoapi.factory.chevre.event.screeningEvent.
             ...(event.offers?.validThrough !== undefined) ? { validThrough: event.offers.validThrough } : undefined
         },
         superEvent: {
+            ...(typeof event.superEvent.id === 'string') ? { id: event.superEvent.id } : undefined,
             ...(typeof event.superEvent.description?.ja === 'string') ? { description: event.superEvent.description } : undefined,
             ...(typeof event.superEvent.dubLanguage?.name === 'string')
                 ? { dubLanguage: { name: event.superEvent.dubLanguage.name } }

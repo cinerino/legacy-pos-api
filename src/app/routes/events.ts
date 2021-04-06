@@ -21,6 +21,7 @@ export interface IEvent4pos {
         name?: cinerinoapi.factory.chevre.multilingualString;
     };
     maximumAttendeeCapacity?: number;
+    name?: cinerinoapi.factory.chevre.multilingualString;
     offers?: {
         validFrom?: Date;
         validThrough?: Date;
@@ -38,6 +39,7 @@ export interface IEvent4pos {
 
     };
     workPerformed?: {
+        identifier?: string;
         headline?: string;
         contentRating?: string;
         duration?: string;
@@ -164,6 +166,7 @@ function event2event4pos(event: cinerinoapi.factory.chevre.event.screeningEvent.
         eventStatus: event.eventStatus,
         startDate: event.startDate,
         ...(event.doorTime !== undefined) ? { doorTime: event.doorTime } : undefined,
+        ...(typeof event.name?.ja === 'string') ? { name: event.name } : undefined,
         ...(typeof event.maximumAttendeeCapacity === 'number') ? { maximumAttendeeCapacity: event.maximumAttendeeCapacity } : undefined,
         ...(typeof event.remainingAttendeeCapacity === 'number')
             ? { remainingAttendeeCapacity: event.remainingAttendeeCapacity }
@@ -187,6 +190,7 @@ function event2event4pos(event: cinerinoapi.factory.chevre.event.screeningEvent.
                 : undefined
         },
         workPerformed: {
+            ...(typeof event.workPerformed?.identifier === 'string') ? { identifier: event.workPerformed.identifier } : undefined,
             ...(typeof event.workPerformed?.headline === 'string') ? { headline: event.workPerformed.headline } : undefined,
             ...(typeof event.workPerformed?.contentRating === 'string') ? { contentRating: event.workPerformed.contentRating } : undefined,
             ...(typeof event.workPerformed?.duration === 'string') ? { duration: event.workPerformed.duration } : undefined

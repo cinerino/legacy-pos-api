@@ -23,9 +23,6 @@ const TRANSACTION_KEY_PREFIX = 'smarttheater-legacy-pos-api:placeOrder:';
 const TRANSACTION_AMOUNT_TTL = TRANSACTION_TTL;
 const TRANSACTION_AMOUNT_KEY_PREFIX = `${TRANSACTION_KEY_PREFIX}amount:`;
 
-const ORDERS_TTL = 86400;
-export const ORDERS_KEY_PREFIX = 'smarttheater-legacy-pos-api:orders:';
-
 const redisClient = redis.createClient({
     host: <string>process.env.REDIS_HOST,
     port: Number(<string>process.env.REDIS_PORT),
@@ -341,21 +338,6 @@ placeOrderTransactionsRouter.post(
             if (confirmationNumber === undefined) {
                 throw new cinerinoapi.factory.errors.ServiceUnavailable('confirmationNumber not found');
             }
-
-            // 返品できるようにしばし注文情報を保管
-            const orderKey = `${ORDERS_KEY_PREFIX}${confirmationNumber}`;
-            await new Promise((resolve, reject) => {
-                redisClient.multi()
-                    .set(orderKey, JSON.stringify(transactionResult.order))
-                    .expire(orderKey, ORDERS_TTL)
-                    .exec((err) => {
-                        if (err !== null) {
-                            reject(err);
-                        } else {
-                            resolve();
-                        }
-                    });
-            });
 
             // 万が一コードを発行できないケースもあるので、考慮すること
             const code = await publishCode(req, transactionResult.order, req.params.transactionId);

@@ -13,13 +13,14 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Changed
 
-- USE_NEW_RETURN_ORDER_PARAMS_FROM設定を追加
 - 返品取引開始前の注文状態確認処理を追加
 - 返品取引開始前に注文クライアントと返品クライアントの同一性を確認
 - aws.cognito.signin.user.adminスコープへの許可を廃止
 - cinerinoのsomethingスコープを許可するように設定
 - posスコープへの許可を廃止
 - イベント検索条件拡張
+- 返品のための一時的な注文保管を廃止
+- 上映日での注文返品を廃止
 
 ### Deprecated
 

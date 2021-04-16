@@ -9,7 +9,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ORDERS_KEY_PREFIX = void 0;
 /**
  * 注文取引ルーター(POS専用)
  */
@@ -29,8 +28,6 @@ const TRANSACTION_TTL = 3600;
 const TRANSACTION_KEY_PREFIX = 'smarttheater-legacy-pos-api:placeOrder:';
 const TRANSACTION_AMOUNT_TTL = TRANSACTION_TTL;
 const TRANSACTION_AMOUNT_KEY_PREFIX = `${TRANSACTION_KEY_PREFIX}amount:`;
-const ORDERS_TTL = 86400;
-exports.ORDERS_KEY_PREFIX = 'smarttheater-legacy-pos-api:orders:';
 const redisClient = redis.createClient({
     host: process.env.REDIS_HOST,
     port: Number(process.env.REDIS_PORT),
@@ -287,21 +284,6 @@ placeOrderTransactionsRouter.post('/:transactionId/confirm', permitScopes_1.defa
         if (confirmationNumber === undefined) {
             throw new cinerinoapi.factory.errors.ServiceUnavailable('confirmationNumber not found');
         }
-        // 返品できるようにしばし注文情報を保管
-        const orderKey = `${exports.ORDERS_KEY_PREFIX}${confirmationNumber}`;
-        yield new Promise((resolve, reject) => {
-            redisClient.multi()
-                .set(orderKey, JSON.stringify(transactionResult.order))
-                .expire(orderKey, ORDERS_TTL)
-                .exec((err) => {
-                if (err !== null) {
-                    reject(err);
-                }
-                else {
-                    resolve();
-                }
-            });
-        });
         // 万が一コードを発行できないケースもあるので、考慮すること
         const code = yield publishCode(req, transactionResult.order, req.params.transactionId);
         res.status(http_status_1.CREATED)

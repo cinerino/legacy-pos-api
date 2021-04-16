@@ -12,21 +12,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.searchByChevre = void 0;
 const cinerinoapi = require("@cinerino/sdk");
 const moment = require("moment-timezone");
-// const EXCLUDE_TICKET_TYPES_IN_EVENTS = process.env.EXCLUDE_TICKET_TYPES_IN_EVENTS === '1';
-const USE_NEW_RETURN_ORDER_PARAMS_FROM = (typeof process.env.USE_NEW_RETURN_ORDER_PARAMS_FROM === 'string')
-    ? moment(process.env.USE_NEW_RETURN_ORDER_PARAMS_FROM)
-        .toDate()
-    : undefined;
 function searchByChevre(params, clientId) {
     return (eventService) => __awaiter(this, void 0, void 0, function* () {
         var _a, _b, _c, _d;
         let events;
-        const now = moment();
-        const useNewReturnOrderParams = USE_NEW_RETURN_ORDER_PARAMS_FROM instanceof Date
-            && moment(USE_NEW_RETURN_ORDER_PARAMS_FROM)
-                .isSameOrBefore(now);
-        // let excludeTicketTypes = EXCLUDE_TICKET_TYPES_IN_EVENTS;
-        let excludeTicketTypes = useNewReturnOrderParams;
+        let excludeTicketTypes = true;
         // performanceId指定の場合はこちら
         if (typeof params.performanceId === 'string') {
             const event = yield eventService.findById({ id: params.performanceId });

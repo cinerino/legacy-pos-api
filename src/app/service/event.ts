@@ -1,12 +1,6 @@
 import * as cinerinoapi from '@cinerino/sdk';
 import * as moment from 'moment-timezone';
 
-// const EXCLUDE_TICKET_TYPES_IN_EVENTS = process.env.EXCLUDE_TICKET_TYPES_IN_EVENTS === '1';
-const USE_NEW_RETURN_ORDER_PARAMS_FROM = (typeof process.env.USE_NEW_RETURN_ORDER_PARAMS_FROM === 'string')
-    ? moment(process.env.USE_NEW_RETURN_ORDER_PARAMS_FROM)
-        .toDate()
-    : undefined;
-
 export interface ITicketType {
     charge?: number;
     name: {
@@ -43,12 +37,7 @@ export function searchByChevre(params: ISearchConditions4pos, clientId: string) 
     return async (eventService: cinerinoapi.service.Event): Promise<IEvent4pos[]> => {
         let events: cinerinoapi.factory.chevre.event.screeningEvent.IEvent[];
 
-        const now = moment();
-        const useNewReturnOrderParams = USE_NEW_RETURN_ORDER_PARAMS_FROM instanceof Date
-            && moment(USE_NEW_RETURN_ORDER_PARAMS_FROM)
-                .isSameOrBefore(now);
-        // let excludeTicketTypes = EXCLUDE_TICKET_TYPES_IN_EVENTS;
-        let excludeTicketTypes = useNewReturnOrderParams;
+        let excludeTicketTypes = true;
 
         // performanceId指定の場合はこちら
         if (typeof params.performanceId === 'string') {

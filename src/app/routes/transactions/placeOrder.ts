@@ -288,9 +288,16 @@ placeOrderTransactionsRouter.delete(
     }
 );
 
-placeOrderTransactionsRouter.post(
+// tslint:disable-next-line:use-default-type-parameter
+placeOrderTransactionsRouter.post<ParamsDictionary>(
     '/:transactionId/confirm',
     permitScopes([]),
+    ...[
+        body('result.order.price')
+            .optional()
+            .isInt()
+            .toInt()
+    ],
     validator,
     async (req, res, next) => {
         try {
@@ -302,16 +309,23 @@ placeOrderTransactionsRouter.post(
             });
 
             // 金額取得
-            const amountKey = `${TRANSACTION_AMOUNT_KEY_PREFIX}${req.params.transactionId}`;
-            const amount = await new Promise<number>((resolve, reject) => {
-                redisClient.get(amountKey, (err, reply) => {
-                    if (err !== null) {
-                        reject(err);
-                    } else {
-                        resolve(Number(reply));
-                    }
+            let amount: number;
+            const amountByRequest = req.body.result?.order?.price;
+            if (typeof amountByRequest === 'number') {
+                amount = amountByRequest;
+            } else {
+                //  金額の指定がなければ自動割り当て
+                const amountKey = `${TRANSACTION_AMOUNT_KEY_PREFIX}${req.params.transactionId}`;
+                amount = await new Promise<number>((resolve, reject) => {
+                    redisClient.get(amountKey, (err, reply) => {
+                        if (err !== null) {
+                            reject(err);
+                        } else {
+                            resolve(Number(reply));
+                        }
+                    });
                 });
-            });
+            }
 
             await paymentService.authorizeAnyPayment({
                 object: {

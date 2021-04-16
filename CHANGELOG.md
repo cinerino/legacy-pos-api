@@ -21,6 +21,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 - イベント検索条件拡張
 - 返品のための一時的な注文保管を廃止
 - 上映日での注文返品を廃止
+- 注文返品時に金額を指定できるように調整
 
 ### Deprecated
 

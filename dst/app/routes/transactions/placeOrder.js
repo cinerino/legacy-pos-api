@@ -241,8 +241,14 @@ placeOrderTransactionsRouter.delete('/:transactionId/actions/authorize/seatReser
         next(error);
     }
 }));
-placeOrderTransactionsRouter.post('/:transactionId/confirm', permitScopes_1.default([]), validator_1.default, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    var _b, _c;
+// tslint:disable-next-line:use-default-type-parameter
+placeOrderTransactionsRouter.post('/:transactionId/confirm', permitScopes_1.default([]), ...[
+    express_validator_1.body('result.order.price')
+        .optional()
+        .isInt()
+        .toInt()
+], validator_1.default, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    var _b, _c, _d, _e;
     try {
         // クライアントがPOSの場合、決済方法承認アクションを自動生成
         const paymentService = new cinerinoapi.service.Payment({
@@ -251,17 +257,25 @@ placeOrderTransactionsRouter.post('/:transactionId/confirm', permitScopes_1.defa
             project: { id: req.project.id }
         });
         // 金額取得
-        const amountKey = `${TRANSACTION_AMOUNT_KEY_PREFIX}${req.params.transactionId}`;
-        const amount = yield new Promise((resolve, reject) => {
-            redisClient.get(amountKey, (err, reply) => {
-                if (err !== null) {
-                    reject(err);
-                }
-                else {
-                    resolve(Number(reply));
-                }
+        let amount;
+        const amountByRequest = (_c = (_b = req.body.result) === null || _b === void 0 ? void 0 : _b.order) === null || _c === void 0 ? void 0 : _c.price;
+        if (typeof amountByRequest === 'number') {
+            amount = amountByRequest;
+        }
+        else {
+            //  金額の指定がなければ自動割り当て
+            const amountKey = `${TRANSACTION_AMOUNT_KEY_PREFIX}${req.params.transactionId}`;
+            amount = yield new Promise((resolve, reject) => {
+                redisClient.get(amountKey, (err, reply) => {
+                    if (err !== null) {
+                        reject(err);
+                    }
+                    else {
+                        resolve(Number(reply));
+                    }
+                });
             });
-        });
+        }
         yield paymentService.authorizeAnyPayment({
             object: {
                 typeOf: cinerinoapi.factory.action.authorize.paymentMethod.any.ResultType.Payment,
@@ -280,7 +294,7 @@ placeOrderTransactionsRouter.post('/:transactionId/confirm', permitScopes_1.defa
         const transactionResult = yield placeOrderService.confirm({
             id: req.params.transactionId
         });
-        const confirmationNumber = (_c = (_b = transactionResult.order.identifier) === null || _b === void 0 ? void 0 : _b.find((p) => p.name === 'confirmationNumber')) === null || _c === void 0 ? void 0 : _c.value;
+        const confirmationNumber = (_e = (_d = transactionResult.order.identifier) === null || _d === void 0 ? void 0 : _d.find((p) => p.name === 'confirmationNumber')) === null || _e === void 0 ? void 0 : _e.value;
         if (confirmationNumber === undefined) {
             throw new cinerinoapi.factory.errors.ServiceUnavailable('confirmationNumber not found');
         }

@@ -22,6 +22,7 @@ const redis = require("redis");
 const permitScopes_1 = require("../../middlewares/permitScopes");
 const rateLimit_1 = require("../../middlewares/rateLimit");
 const validator_1 = require("../../middlewares/validator");
+const DISABLE_TRANSACTION_AMOUNT_REPOSITORY = process.env.DISABLE_TRANSACTION_AMOUNT_REPOSITORY === '1';
 const CODE_EXPIRES_IN_SECONDS = 8035200; // 93日
 const WAITER_SCOPE = process.env.WAITER_SCOPE;
 const TRANSACTION_TTL = 3600;
@@ -263,6 +264,9 @@ placeOrderTransactionsRouter.post('/:transactionId/confirm', permitScopes_1.defa
             amount = amountByRequest;
         }
         else {
+            if (DISABLE_TRANSACTION_AMOUNT_REPOSITORY) {
+                throw new cinerinoapi.factory.errors.ArgumentNull('result.order.price');
+            }
             //  金額の指定がなければ自動割り当て
             const amountKey = `${TRANSACTION_AMOUNT_KEY_PREFIX}${req.params.transactionId}`;
             amount = yield new Promise((resolve, reject) => {

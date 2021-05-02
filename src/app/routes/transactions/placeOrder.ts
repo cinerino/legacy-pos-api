@@ -15,6 +15,7 @@ import permitScopes from '../../middlewares/permitScopes';
 import rateLimit from '../../middlewares/rateLimit';
 import validator from '../../middlewares/validator';
 
+const DISABLE_TRANSACTION_AMOUNT_REPOSITORY = process.env.DISABLE_TRANSACTION_AMOUNT_REPOSITORY === '1';
 const CODE_EXPIRES_IN_SECONDS = 8035200; // 93日
 const WAITER_SCOPE = process.env.WAITER_SCOPE;
 
@@ -314,6 +315,10 @@ placeOrderTransactionsRouter.post<ParamsDictionary>(
             if (typeof amountByRequest === 'number') {
                 amount = amountByRequest;
             } else {
+                if (DISABLE_TRANSACTION_AMOUNT_REPOSITORY) {
+                    throw new cinerinoapi.factory.errors.ArgumentNull('result.order.price');
+                }
+
                 //  金額の指定がなければ自動割り当て
                 const amountKey = `${TRANSACTION_AMOUNT_KEY_PREFIX}${req.params.transactionId}`;
                 amount = await new Promise<number>((resolve, reject) => {

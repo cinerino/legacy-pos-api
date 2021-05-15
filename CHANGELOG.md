@@ -8,6 +8,20 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Added
 
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Security
+
+## v1.11.0 - 2021-05-15
+
+### Added
+
 - コンテンツ検索を追加
 - 施設コンテンツ検索を追加
 
@@ -23,14 +37,6 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 - 上映日での注文返品を廃止
 - 注文取引確定時に金額を指定できるように調整
 - 注文金額自動計算を廃止
-
-### Deprecated
-
-### Removed
-
-### Fixed
-
-### Security
 
 ## v1.10.0 - 2021-03-19
 

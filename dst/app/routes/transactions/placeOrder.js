@@ -18,22 +18,11 @@ const express_validator_1 = require("express-validator");
 const http_status_1 = require("http-status");
 const moment = require("moment-timezone");
 const node_fetch_1 = require("node-fetch");
-// import * as redis from 'redis';
 const permitScopes_1 = require("../../middlewares/permitScopes");
 const rateLimit_1 = require("../../middlewares/rateLimit");
 const validator_1 = require("../../middlewares/validator");
 const CODE_EXPIRES_IN_SECONDS = 8035200; // 93日
 const WAITER_SCOPE = process.env.WAITER_SCOPE;
-// const TRANSACTION_TTL = 3600;
-// const TRANSACTION_KEY_PREFIX = 'smarttheater-legacy-pos-api:placeOrder:';
-// const TRANSACTION_AMOUNT_TTL = TRANSACTION_TTL;
-// const TRANSACTION_AMOUNT_KEY_PREFIX = `${TRANSACTION_KEY_PREFIX}amount:`;
-// const redisClient = redis.createClient({
-//     host: <string>process.env.REDIS_HOST,
-//     port: Number(<string>process.env.REDIS_PORT),
-//     password: <string>process.env.REDIS_KEY,
-//     tls: (process.env.REDIS_TLS_SERVERNAME !== undefined) ? { servername: process.env.REDIS_TLS_SERVERNAME } : undefined
-// });
 function publishWaiterScope(params) {
     return __awaiter(this, void 0, void 0, function* () {
         // WAITER許可証を取得
@@ -178,24 +167,6 @@ placeOrderTransactionsRouter.post('/:transactionId/actions/authorize/seatReserva
             performanceId: req.body.performance_id,
             offers: req.body.offers
         });
-        // const actionResult = action.result;
-        // if (actionResult !== undefined) {
-        //     // 金額保管
-        //     const amountKey = `${TRANSACTION_AMOUNT_KEY_PREFIX}${req.params.transactionId}`;
-        //     const amount = actionResult.price;
-        //     await new Promise((resolve, reject) => {
-        //         redisClient.multi()
-        //             .set(amountKey, amount.toString())
-        //             .expire(amountKey, TRANSACTION_AMOUNT_TTL)
-        //             .exec((err) => {
-        //                 if (err !== null) {
-        //                     reject(err);
-        //                 } else {
-        //                     resolve();
-        //                 }
-        //             });
-        //     });
-        // }
         res.status(http_status_1.CREATED)
             // responseはアクションIDのみで十分
             .json({ id: action.id });
@@ -218,20 +189,6 @@ placeOrderTransactionsRouter.delete('/:transactionId/actions/authorize/seatReser
             id: req.params.actionId,
             purpose: { typeOf: cinerinoapi.factory.transactionType.PlaceOrder, id: req.params.transactionId }
         });
-        // 金額リセット
-        // const amountKey = `${TRANSACTION_AMOUNT_KEY_PREFIX}${req.params.transactionId}`;
-        // await new Promise((resolve, reject) => {
-        //     redisClient.multi()
-        //         .set(amountKey, '0')
-        //         .expire(amountKey, TRANSACTION_AMOUNT_TTL)
-        //         .exec((err) => {
-        //             if (err !== null) {
-        //                 reject(err);
-        //             } else {
-        //                 resolve();
-        //             }
-        //         });
-        // });
         res.status(http_status_1.NO_CONTENT)
             .end();
     }

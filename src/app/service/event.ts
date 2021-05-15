@@ -1,8 +1,6 @@
 import * as cinerinoapi from '@cinerino/sdk';
 import * as moment from 'moment-timezone';
 
-const EXCLUDE_TICKET_TYPES_IN_EVENTS = process.env.EXCLUDE_TICKET_TYPES_IN_EVENTS === '1';
-
 export interface ITicketType {
     charge?: number;
     name: {
@@ -39,7 +37,7 @@ export function searchByChevre(params: ISearchConditions4pos, clientId: string) 
     return async (eventService: cinerinoapi.service.Event): Promise<IEvent4pos[]> => {
         let events: cinerinoapi.factory.chevre.event.screeningEvent.IEvent[];
 
-        let excludeTicketTypes = EXCLUDE_TICKET_TYPES_IN_EVENTS;
+        let excludeTicketTypes = true;
 
         // performanceId指定の場合はこちら
         if (typeof params.performanceId === 'string') {
@@ -86,29 +84,34 @@ export function searchByChevre(params: ISearchConditions4pos, clientId: string) 
 
         const firstEvent = events[0];
 
-        const offers = await eventService.searchTicketOffers({
-            event: { id: firstEvent.id },
-            seller: {
-                typeOf: <cinerinoapi.factory.chevre.organizationType>firstEvent.offers?.seller?.typeOf,
-                id: <string>firstEvent.offers?.seller?.id
-            },
-            store: {
-                id: clientId
-            }
-        });
+        let unitPriceOffers: cinerinoapi.factory.chevre.offer.IUnitPriceOffer[] = [];
 
-        const unitPriceOffers: cinerinoapi.factory.chevre.offer.IUnitPriceOffer[] = offers.map((o) => {
-            // tslint:disable-next-line:max-line-length
-            const unitPriceSpec = <cinerinoapi.factory.chevre.priceSpecification.IPriceSpecification<cinerinoapi.factory.chevre.priceSpecificationType.UnitPriceSpecification>>
-                o.priceSpecification.priceComponent.find(
-                    (p) => p.typeOf === cinerinoapi.factory.chevre.priceSpecificationType.UnitPriceSpecification
-                );
+        // オファーリスト除外でなければ、オファー検索
+        if (!excludeTicketTypes) {
+            const offers = await eventService.searchTicketOffers({
+                event: { id: firstEvent.id },
+                seller: {
+                    typeOf: <cinerinoapi.factory.chevre.organizationType>firstEvent.offers?.seller?.typeOf,
+                    id: <string>firstEvent.offers?.seller?.id
+                },
+                store: {
+                    id: clientId
+                }
+            });
 
-            return {
-                ...o,
-                priceSpecification: unitPriceSpec
-            };
-        });
+            unitPriceOffers = offers.map((o) => {
+                // tslint:disable-next-line:max-line-length
+                const unitPriceSpec = <cinerinoapi.factory.chevre.priceSpecification.IPriceSpecification<cinerinoapi.factory.chevre.priceSpecificationType.UnitPriceSpecification>>
+                    o.priceSpecification.priceComponent.find(
+                        (p) => p.typeOf === cinerinoapi.factory.chevre.priceSpecificationType.UnitPriceSpecification
+                    );
+
+                return {
+                    ...o,
+                    priceSpecification: unitPriceSpec
+                };
+            });
+        }
 
         return events
             .map((event) => {
@@ -123,7 +126,6 @@ function event2event4pos(params: {
     excludeTicketTypes: boolean;
 }): IEvent4pos {
     const event = params.event;
-    const unitPriceOffers = params.unitPriceOffers;
 
     // デフォルトはイベントのremainingAttendeeCapacity
     let seatStatus = event.remainingAttendeeCapacity;
@@ -167,7 +169,7 @@ function event2event4pos(params: {
             ...(params.excludeTicketTypes)
                 ? undefined
                 : {
-                    ticket_types: unitPriceOffers.map((unitPriceOffer) => {
+                    ticket_types: params.unitPriceOffers.map((unitPriceOffer) => {
                         const availableNum =
                             event.aggregateOffer?.offers?.find((o) => o.id === unitPriceOffer.id)?.remainingAttendeeCapacity;
 

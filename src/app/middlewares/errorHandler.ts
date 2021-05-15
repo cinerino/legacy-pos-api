@@ -17,7 +17,7 @@ import {
 
 import { APIError } from '../error/api';
 
-const debug = createDebug('smarttheater-legacy-pos-api:middlewares:errorHandler');
+const debug = createDebug('smarttheater-api:middlewares:errorHandler');
 
 export default (err: any, __: Request, res: Response, next: NextFunction) => {
     debug('handling err...', err);

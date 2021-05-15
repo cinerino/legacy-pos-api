@@ -5,7 +5,9 @@ import * as cinerinoapi from '@cinerino/sdk';
 import * as createDebug from 'debug';
 import { NextFunction, Request, Response } from 'express';
 
-const debug = createDebug('smarttheater-legacy-pos-api:middlewares:permitScopes');
+const debug = createDebug('smarttheater-api:middlewares:permitScopes');
+
+const SCOPE_ANY_RESOURCE = 'something';
 
 /**
  * スコープインターフェース
@@ -26,7 +28,8 @@ export default (permittedScopes: IScope[]) => {
         const permittedScopesWithResourceServerIdentifier = [
             ...permittedScopes.map((permittedScope) => `${process.env.RESOURECE_SERVER_IDENTIFIER}/${permittedScope}`),
             ...permittedScopes.map((permittedScope) => `${process.env.RESOURECE_SERVER_IDENTIFIER}/auth/${permittedScope}`),
-            ...['aws.cognito.signin.user.admin'] // 管理者ログインスコープは無条件に許容
+            // SCOPE_ANY_RESOURCEについてはすべて許可
+            `${process.env.RESOURECE_SERVER_IDENTIFIER}/${SCOPE_ANY_RESOURCE}`
         ];
         debug('permittedScopesWithResourceServerIdentifier:', permittedScopesWithResourceServerIdentifier);
 

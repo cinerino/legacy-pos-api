@@ -9,7 +9,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ORDERS_KEY_PREFIX = void 0;
 /**
  * 注文取引ルーター(POS専用)
  */
@@ -19,24 +18,11 @@ const express_validator_1 = require("express-validator");
 const http_status_1 = require("http-status");
 const moment = require("moment-timezone");
 const node_fetch_1 = require("node-fetch");
-const redis = require("redis");
 const permitScopes_1 = require("../../middlewares/permitScopes");
 const rateLimit_1 = require("../../middlewares/rateLimit");
 const validator_1 = require("../../middlewares/validator");
 const CODE_EXPIRES_IN_SECONDS = 8035200; // 93日
 const WAITER_SCOPE = process.env.WAITER_SCOPE;
-const TRANSACTION_TTL = 3600;
-const TRANSACTION_KEY_PREFIX = 'smarttheater-legacy-pos-api:placeOrder:';
-const TRANSACTION_AMOUNT_TTL = TRANSACTION_TTL;
-const TRANSACTION_AMOUNT_KEY_PREFIX = `${TRANSACTION_KEY_PREFIX}amount:`;
-const ORDERS_TTL = 86400;
-exports.ORDERS_KEY_PREFIX = 'smarttheater-legacy-pos-api:orders:';
-const redisClient = redis.createClient({
-    host: process.env.REDIS_HOST,
-    port: Number(process.env.REDIS_PORT),
-    password: process.env.REDIS_KEY,
-    tls: (process.env.REDIS_TLS_SERVERNAME !== undefined) ? { servername: process.env.REDIS_TLS_SERVERNAME } : undefined
-});
 function publishWaiterScope(params) {
     return __awaiter(this, void 0, void 0, function* () {
         // WAITER許可証を取得
@@ -61,7 +47,7 @@ function publishWaiterScope(params) {
 }
 const placeOrderTransactionsRouter = express_1.Router();
 placeOrderTransactionsRouter.use(rateLimit_1.default);
-placeOrderTransactionsRouter.post('/start', permitScopes_1.default(['pos']), ...[
+placeOrderTransactionsRouter.post('/start', permitScopes_1.default([]), ...[
     express_validator_1.body('expires')
         .not()
         .isEmpty()
@@ -125,7 +111,7 @@ placeOrderTransactionsRouter.post('/start', permitScopes_1.default(['pos']), ...
  * 購入者情報を変更する
  */
 // tslint:disable-next-line:use-default-type-parameter
-placeOrderTransactionsRouter.put('/:transactionId/customerContact', permitScopes_1.default(['pos']), ...[
+placeOrderTransactionsRouter.put('/:transactionId/customerContact', permitScopes_1.default([]), ...[
     express_validator_1.body('last_name')
         .not()
         .isEmpty()
@@ -166,7 +152,7 @@ placeOrderTransactionsRouter.put('/:transactionId/customerContact', permitScopes
 /**
  * 座席仮予約
  */
-placeOrderTransactionsRouter.post('/:transactionId/actions/authorize/seatReservation', permitScopes_1.default(['pos']), validator_1.default, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+placeOrderTransactionsRouter.post('/:transactionId/actions/authorize/seatReservation', permitScopes_1.default([]), validator_1.default, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         if (!Array.isArray(req.body.offers)) {
             req.body.offers = [];
@@ -181,25 +167,6 @@ placeOrderTransactionsRouter.post('/:transactionId/actions/authorize/seatReserva
             performanceId: req.body.performance_id,
             offers: req.body.offers
         });
-        const actionResult = action.result;
-        if (actionResult !== undefined) {
-            // 金額保管
-            const amountKey = `${TRANSACTION_AMOUNT_KEY_PREFIX}${req.params.transactionId}`;
-            const amount = actionResult.price;
-            yield new Promise((resolve, reject) => {
-                redisClient.multi()
-                    .set(amountKey, amount.toString())
-                    .expire(amountKey, TRANSACTION_AMOUNT_TTL)
-                    .exec((err) => {
-                    if (err !== null) {
-                        reject(err);
-                    }
-                    else {
-                        resolve();
-                    }
-                });
-            });
-        }
         res.status(http_status_1.CREATED)
             // responseはアクションIDのみで十分
             .json({ id: action.id });
@@ -211,7 +178,7 @@ placeOrderTransactionsRouter.post('/:transactionId/actions/authorize/seatReserva
 /**
  * 座席仮予約削除
  */
-placeOrderTransactionsRouter.delete('/:transactionId/actions/authorize/seatReservation/:actionId', permitScopes_1.default(['pos']), validator_1.default, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+placeOrderTransactionsRouter.delete('/:transactionId/actions/authorize/seatReservation/:actionId', permitScopes_1.default([]), validator_1.default, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const placeOrderService = new cinerinoapi.service.transaction.PlaceOrder({
             auth: req.authClient,
@@ -222,21 +189,6 @@ placeOrderTransactionsRouter.delete('/:transactionId/actions/authorize/seatReser
             id: req.params.actionId,
             purpose: { typeOf: cinerinoapi.factory.transactionType.PlaceOrder, id: req.params.transactionId }
         });
-        // 金額リセット
-        const amountKey = `${TRANSACTION_AMOUNT_KEY_PREFIX}${req.params.transactionId}`;
-        yield new Promise((resolve, reject) => {
-            redisClient.multi()
-                .set(amountKey, '0')
-                .expire(amountKey, TRANSACTION_AMOUNT_TTL)
-                .exec((err) => {
-                if (err !== null) {
-                    reject(err);
-                }
-                else {
-                    resolve();
-                }
-            });
-        });
         res.status(http_status_1.NO_CONTENT)
             .end();
     }
@@ -244,7 +196,14 @@ placeOrderTransactionsRouter.delete('/:transactionId/actions/authorize/seatReser
         next(error);
     }
 }));
-placeOrderTransactionsRouter.post('/:transactionId/confirm', permitScopes_1.default(['pos']), validator_1.default, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+// tslint:disable-next-line:use-default-type-parameter
+placeOrderTransactionsRouter.post('/:transactionId/confirm', permitScopes_1.default([]), ...[
+    express_validator_1.body('result.order.price')
+        .not()
+        .isEmpty()
+        .isInt()
+        .toInt()
+], validator_1.default, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     var _b, _c;
     try {
         // クライアントがPOSの場合、決済方法承認アクションを自動生成
@@ -254,17 +213,14 @@ placeOrderTransactionsRouter.post('/:transactionId/confirm', permitScopes_1.defa
             project: { id: req.project.id }
         });
         // 金額取得
-        const amountKey = `${TRANSACTION_AMOUNT_KEY_PREFIX}${req.params.transactionId}`;
-        const amount = yield new Promise((resolve, reject) => {
-            redisClient.get(amountKey, (err, reply) => {
-                if (err !== null) {
-                    reject(err);
-                }
-                else {
-                    resolve(Number(reply));
-                }
-            });
-        });
+        let amount;
+        const amountByRequest = (_c = (_b = req.body.result) === null || _b === void 0 ? void 0 : _b.order) === null || _c === void 0 ? void 0 : _c.price;
+        if (typeof amountByRequest === 'number') {
+            amount = amountByRequest;
+        }
+        else {
+            throw new cinerinoapi.factory.errors.ArgumentNull('result.order.price');
+        }
         yield paymentService.authorizeAnyPayment({
             object: {
                 typeOf: cinerinoapi.factory.action.authorize.paymentMethod.any.ResultType.Payment,
@@ -283,25 +239,10 @@ placeOrderTransactionsRouter.post('/:transactionId/confirm', permitScopes_1.defa
         const transactionResult = yield placeOrderService.confirm({
             id: req.params.transactionId
         });
-        const confirmationNumber = (_c = (_b = transactionResult.order.identifier) === null || _b === void 0 ? void 0 : _b.find((p) => p.name === 'confirmationNumber')) === null || _c === void 0 ? void 0 : _c.value;
-        if (confirmationNumber === undefined) {
-            throw new cinerinoapi.factory.errors.ServiceUnavailable('confirmationNumber not found');
-        }
-        // 返品できるようにしばし注文情報を保管
-        const orderKey = `${exports.ORDERS_KEY_PREFIX}${confirmationNumber}`;
-        yield new Promise((resolve, reject) => {
-            redisClient.multi()
-                .set(orderKey, JSON.stringify(transactionResult.order))
-                .expire(orderKey, ORDERS_TTL)
-                .exec((err) => {
-                if (err !== null) {
-                    reject(err);
-                }
-                else {
-                    resolve();
-                }
-            });
-        });
+        // const confirmationNumber = transactionResult.order.identifier?.find((p) => p.name === 'confirmationNumber')?.value;
+        // if (confirmationNumber === undefined) {
+        //     throw new cinerinoapi.factory.errors.ServiceUnavailable('confirmationNumber not found');
+        // }
         // 万が一コードを発行できないケースもあるので、考慮すること
         const code = yield publishCode(req, transactionResult.order, req.params.transactionId);
         res.status(http_status_1.CREATED)
@@ -336,40 +277,51 @@ function publishCode(req, order, transactionId) {
             endpoint: process.env.CINERINO_API_ENDPOINT,
             project: { id: req.project.id }
         });
-        try {
-            // まず注文作成(非同期処理が間に合わない可能性ありなので)
-            yield orderService.placeOrder({
-                object: {
-                    orderNumber: order.orderNumber,
-                    confirmationNumber: order.confirmationNumber
-                },
-                purpose: {
-                    typeOf: cinerinoapi.factory.transactionType.PlaceOrder,
-                    id: transactionId
-                }
-            });
-        }
-        catch (error) {
-            // tslint:disable-next-line:no-console
-            console.error(error);
+        let tryCount = 0;
+        const MAX_TRY_COUNT = 3;
+        while (tryCount < MAX_TRY_COUNT) {
+            try {
+                tryCount += 1;
+                // まず注文作成(非同期処理が間に合わない可能性ありなので)
+                yield orderService.placeOrder({
+                    object: {
+                        orderNumber: order.orderNumber,
+                        confirmationNumber: order.confirmationNumber
+                    },
+                    purpose: {
+                        typeOf: cinerinoapi.factory.transactionType.PlaceOrder,
+                        id: transactionId
+                    }
+                });
+                break;
+            }
+            catch (error) {
+                // tslint:disable-next-line:no-console
+                console.error(error);
+            }
         }
         // 注文承認
         let code;
-        try {
-            const authorizeOrderResult = yield orderService.authorize({
-                object: {
-                    orderNumber: order.orderNumber,
-                    customer: { telephone: order.customer.telephone }
-                },
-                result: {
-                    expiresInSeconds: CODE_EXPIRES_IN_SECONDS
-                }
-            });
-            code = authorizeOrderResult.code;
-        }
-        catch (error) {
-            // tslint:disable-next-line:no-console
-            console.error(error);
+        let tryCount4code = 0;
+        while (tryCount4code < MAX_TRY_COUNT) {
+            try {
+                tryCount4code += 1;
+                const authorizeOrderResult = yield orderService.authorize({
+                    object: {
+                        orderNumber: order.orderNumber,
+                        customer: { telephone: order.customer.telephone }
+                    },
+                    result: {
+                        expiresInSeconds: CODE_EXPIRES_IN_SECONDS
+                    }
+                });
+                code = authorizeOrderResult.code;
+                break;
+            }
+            catch (error) {
+                // tslint:disable-next-line:no-console
+                console.error(error);
+            }
         }
         return code;
     });

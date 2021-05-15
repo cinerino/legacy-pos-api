@@ -9,27 +9,26 @@ import { body } from 'express-validator';
 import { CREATED, NO_CONTENT } from 'http-status';
 import * as moment from 'moment-timezone';
 import fetch from 'node-fetch';
-import * as redis from 'redis';
+// import * as redis from 'redis';
 
 import permitScopes from '../../middlewares/permitScopes';
 import rateLimit from '../../middlewares/rateLimit';
 import validator from '../../middlewares/validator';
 
-const DISABLE_TRANSACTION_AMOUNT_REPOSITORY = process.env.DISABLE_TRANSACTION_AMOUNT_REPOSITORY === '1';
 const CODE_EXPIRES_IN_SECONDS = 8035200; // 93日
 const WAITER_SCOPE = process.env.WAITER_SCOPE;
 
-const TRANSACTION_TTL = 3600;
-const TRANSACTION_KEY_PREFIX = 'smarttheater-legacy-pos-api:placeOrder:';
-const TRANSACTION_AMOUNT_TTL = TRANSACTION_TTL;
-const TRANSACTION_AMOUNT_KEY_PREFIX = `${TRANSACTION_KEY_PREFIX}amount:`;
+// const TRANSACTION_TTL = 3600;
+// const TRANSACTION_KEY_PREFIX = 'smarttheater-legacy-pos-api:placeOrder:';
+// const TRANSACTION_AMOUNT_TTL = TRANSACTION_TTL;
+// const TRANSACTION_AMOUNT_KEY_PREFIX = `${TRANSACTION_KEY_PREFIX}amount:`;
 
-const redisClient = redis.createClient({
-    host: <string>process.env.REDIS_HOST,
-    port: Number(<string>process.env.REDIS_PORT),
-    password: <string>process.env.REDIS_KEY,
-    tls: (process.env.REDIS_TLS_SERVERNAME !== undefined) ? { servername: process.env.REDIS_TLS_SERVERNAME } : undefined
-});
+// const redisClient = redis.createClient({
+//     host: <string>process.env.REDIS_HOST,
+//     port: Number(<string>process.env.REDIS_PORT),
+//     password: <string>process.env.REDIS_KEY,
+//     tls: (process.env.REDIS_TLS_SERVERNAME !== undefined) ? { servername: process.env.REDIS_TLS_SERVERNAME } : undefined
+// });
 
 async function publishWaiterScope(params: { project: { id: string } }): Promise<string> {
     // WAITER許可証を取得
@@ -218,24 +217,24 @@ placeOrderTransactionsRouter.post(
                 offers: req.body.offers
             });
 
-            const actionResult = action.result;
-            if (actionResult !== undefined) {
-                // 金額保管
-                const amountKey = `${TRANSACTION_AMOUNT_KEY_PREFIX}${req.params.transactionId}`;
-                const amount = actionResult.price;
-                await new Promise((resolve, reject) => {
-                    redisClient.multi()
-                        .set(amountKey, amount.toString())
-                        .expire(amountKey, TRANSACTION_AMOUNT_TTL)
-                        .exec((err) => {
-                            if (err !== null) {
-                                reject(err);
-                            } else {
-                                resolve();
-                            }
-                        });
-                });
-            }
+            // const actionResult = action.result;
+            // if (actionResult !== undefined) {
+            //     // 金額保管
+            //     const amountKey = `${TRANSACTION_AMOUNT_KEY_PREFIX}${req.params.transactionId}`;
+            //     const amount = actionResult.price;
+            //     await new Promise((resolve, reject) => {
+            //         redisClient.multi()
+            //             .set(amountKey, amount.toString())
+            //             .expire(amountKey, TRANSACTION_AMOUNT_TTL)
+            //             .exec((err) => {
+            //                 if (err !== null) {
+            //                     reject(err);
+            //                 } else {
+            //                     resolve();
+            //                 }
+            //             });
+            //     });
+            // }
 
             res.status(CREATED)
                 // responseはアクションIDのみで十分
@@ -267,19 +266,19 @@ placeOrderTransactionsRouter.delete(
             });
 
             // 金額リセット
-            const amountKey = `${TRANSACTION_AMOUNT_KEY_PREFIX}${req.params.transactionId}`;
-            await new Promise((resolve, reject) => {
-                redisClient.multi()
-                    .set(amountKey, '0')
-                    .expire(amountKey, TRANSACTION_AMOUNT_TTL)
-                    .exec((err) => {
-                        if (err !== null) {
-                            reject(err);
-                        } else {
-                            resolve();
-                        }
-                    });
-            });
+            // const amountKey = `${TRANSACTION_AMOUNT_KEY_PREFIX}${req.params.transactionId}`;
+            // await new Promise((resolve, reject) => {
+            //     redisClient.multi()
+            //         .set(amountKey, '0')
+            //         .expire(amountKey, TRANSACTION_AMOUNT_TTL)
+            //         .exec((err) => {
+            //             if (err !== null) {
+            //                 reject(err);
+            //             } else {
+            //                 resolve();
+            //             }
+            //         });
+            // });
 
             res.status(NO_CONTENT)
                 .end();
@@ -295,7 +294,8 @@ placeOrderTransactionsRouter.post<ParamsDictionary>(
     permitScopes([]),
     ...[
         body('result.order.price')
-            .optional()
+            .not()
+            .isEmpty()
             .isInt()
             .toInt()
     ],
@@ -315,21 +315,7 @@ placeOrderTransactionsRouter.post<ParamsDictionary>(
             if (typeof amountByRequest === 'number') {
                 amount = amountByRequest;
             } else {
-                if (DISABLE_TRANSACTION_AMOUNT_REPOSITORY) {
-                    throw new cinerinoapi.factory.errors.ArgumentNull('result.order.price');
-                }
-
-                //  金額の指定がなければ自動割り当て
-                const amountKey = `${TRANSACTION_AMOUNT_KEY_PREFIX}${req.params.transactionId}`;
-                amount = await new Promise<number>((resolve, reject) => {
-                    redisClient.get(amountKey, (err, reply) => {
-                        if (err !== null) {
-                            reject(err);
-                        } else {
-                            resolve(Number(reply));
-                        }
-                    });
-                });
+                throw new cinerinoapi.factory.errors.ArgumentNull('result.order.price');
             }
 
             await paymentService.authorizeAnyPayment({
@@ -353,10 +339,10 @@ placeOrderTransactionsRouter.post<ParamsDictionary>(
                 id: req.params.transactionId
             });
 
-            const confirmationNumber = transactionResult.order.identifier?.find((p) => p.name === 'confirmationNumber')?.value;
-            if (confirmationNumber === undefined) {
-                throw new cinerinoapi.factory.errors.ServiceUnavailable('confirmationNumber not found');
-            }
+            // const confirmationNumber = transactionResult.order.identifier?.find((p) => p.name === 'confirmationNumber')?.value;
+            // if (confirmationNumber === undefined) {
+            //     throw new cinerinoapi.factory.errors.ServiceUnavailable('confirmationNumber not found');
+            // }
 
             // 万が一コードを発行できないケースもあるので、考慮すること
             const code = await publishCode(req, transactionResult.order, req.params.transactionId);

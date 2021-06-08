@@ -10,18 +10,18 @@ import rateLimit from '../../middlewares/rateLimit';
 import validator from '../../middlewares/validator';
 
 export interface IEvent4pos {
-    additionalProperty?: cinerinoapi.factory.chevre.propertyValue.IPropertyValue<string>[];
+    additionalProperty?: cinerinoapi.factory.propertyValue.IPropertyValue<string>[];
     doorTime?: Date;
     endDate?: Date;
     eventStatus?: string;
     id: string;
     location?: {
-        address?: cinerinoapi.factory.chevre.multilingualString;
+        address?: cinerinoapi.factory.multilingualString;
         branchCode?: string;
-        name?: cinerinoapi.factory.chevre.multilingualString;
+        name?: cinerinoapi.factory.multilingualString;
     };
     maximumAttendeeCapacity?: number;
-    name?: cinerinoapi.factory.chevre.multilingualString;
+    name?: cinerinoapi.factory.multilingualString;
     offers?: {
         validFrom?: Date;
         validThrough?: Date;
@@ -30,7 +30,7 @@ export interface IEvent4pos {
     startDate?: Date;
     superEvent?: {
         id?: string;
-        description?: cinerinoapi.factory.chevre.multilingualString;
+        description?: cinerinoapi.factory.multilingualString;
         dubLanguage?: {
             name?: string;
         };
@@ -118,13 +118,13 @@ screeningEventRouter.get(
             const params = <ISearchConditions4pos>req.query;
 
             const superEventLocationBranchCodes = params.superEvent?.locationBranchCodes;
-            const searchConditions: cinerinoapi.factory.chevre.event.screeningEvent.ISearchConditions = {
+            const searchConditions: cinerinoapi.factory.event.screeningEvent.ISearchConditions = {
                 // tslint:disable-next-line:no-magic-numbers
                 limit: (typeof params.limit === 'number') ? Math.min(params.limit, 100) : 100,
                 page: (typeof params.page === 'number') ? Math.max(params.page, 1) : 1,
                 sort: { startDate: 1 },
-                typeOf: cinerinoapi.factory.chevre.eventType.ScreeningEvent,
-                eventStatuses: [cinerinoapi.factory.chevre.eventStatusType.EventScheduled],
+                typeOf: cinerinoapi.factory.eventType.ScreeningEvent,
+                eventStatuses: [cinerinoapi.factory.eventStatusType.EventScheduled],
                 offers: {
                     ...(params.offers?.availableFrom instanceof Date) ? { availableFrom: params.offers.availableFrom } : undefined,
                     ...(params.offers?.availableThrough instanceof Date) ? { availableThrough: params.offers.availableThrough } : undefined,
@@ -159,7 +159,7 @@ screeningEventRouter.get(
 
 export default screeningEventRouter;
 
-function event2event4pos(event: cinerinoapi.factory.chevre.event.screeningEvent.IEvent): IEvent4pos {
+function event2event4pos(event: cinerinoapi.factory.event.screeningEvent.IEvent): IEvent4pos {
     return {
         additionalProperty: (Array.isArray(event.additionalProperty)) ? event.additionalProperty : [],
         id: event.id,

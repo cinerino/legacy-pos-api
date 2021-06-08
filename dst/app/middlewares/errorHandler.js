@@ -23,7 +23,7 @@ exports.default = (err, __, res, next) => {
         if (Array.isArray(err)) {
             apiError = new api_1.APIError(cinerinoError2httpStatusCode(err[0]), err);
         }
-        else if (err instanceof cinerinoapi.factory.errors.Cinerino) {
+        else if (err instanceof cinerinoapi.factory.errors.Chevre) {
             apiError = new api_1.APIError(cinerinoError2httpStatusCode(err), [err]);
         }
         else if (err.name === 'CinerinoRequestError') {
@@ -31,7 +31,7 @@ exports.default = (err, __, res, next) => {
         }
         else {
             // 500
-            apiError = new api_1.APIError(http_status_1.INTERNAL_SERVER_ERROR, [new cinerinoapi.factory.errors.Cinerino(err.message)]);
+            apiError = new api_1.APIError(http_status_1.INTERNAL_SERVER_ERROR, [new cinerinoapi.factory.errors.Chevre(err.message)]);
         }
     }
     res.status(apiError.code)

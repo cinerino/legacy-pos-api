@@ -274,8 +274,8 @@ placeOrderTransactionsRouter.post<ParamsDictionary>(
             await paymentService.authorizeAnyPayment({
                 object: {
                     typeOf: cinerinoapi.factory.action.authorize.paymentMethod.any.ResultType.Payment,
-                    paymentMethod: cinerinoapi.factory.chevre.paymentMethodType.Cash,
-                    name: cinerinoapi.factory.chevre.paymentMethodType.Cash,
+                    paymentMethod: 'Cash', // 固定でCash
+                    name: 'Cash', // 固定でCash
                     additionalProperty: [],
                     amount: amount
                 },

@@ -9,7 +9,7 @@ import screeningEventSeriesRouter from './events/screeningEventSeries';
 
 const eventsRouter = express.Router();
 
-eventsRouter.use(`/${cinerinoapi.factory.chevre.eventType.ScreeningEvent}`, screeningEventRouter);
-eventsRouter.use(`/${cinerinoapi.factory.chevre.eventType.ScreeningEventSeries}`, screeningEventSeriesRouter);
+eventsRouter.use(`/${cinerinoapi.factory.eventType.ScreeningEvent}`, screeningEventRouter);
+eventsRouter.use(`/${cinerinoapi.factory.eventType.ScreeningEventSeries}`, screeningEventSeriesRouter);
 
 export default eventsRouter;

@@ -45,7 +45,7 @@ screeningEventSeriesRouter.get('', permitScopes_1.default([]), ...[
             limit: (typeof params.limit === 'number') ? Math.min(params.limit, 100) : 100,
             page: (typeof params.page === 'number') ? Math.max(params.page, 1) : 1,
             sort: { startDate: 1 },
-            typeOf: cinerinoapi.factory.chevre.eventType.ScreeningEventSeries
+            typeOf: cinerinoapi.factory.eventType.ScreeningEventSeries
         };
         const searchResult = yield eventService.search(searchConditions);
         res.json(searchResult.data.map(event2event4pos));

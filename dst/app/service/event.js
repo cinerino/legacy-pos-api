@@ -26,7 +26,7 @@ function searchByChevre(params, clientId) {
         else {
             const searchConditions = Object.assign(Object.assign({ 
                 // tslint:disable-next-line:no-magic-numbers
-                limit: (params.limit !== undefined) ? Math.min(Number(params.limit), 100) : 100, page: (params.page !== undefined) ? Math.max(Number(params.page), 1) : 1, sort: { startDate: 1 }, typeOf: cinerinoapi.factory.chevre.eventType.ScreeningEvent }, (typeof params.day === 'string' && params.day.length > 0)
+                limit: (params.limit !== undefined) ? Math.min(Number(params.limit), 100) : 100, page: (params.page !== undefined) ? Math.max(Number(params.page), 1) : 1, sort: { startDate: 1 }, typeOf: cinerinoapi.factory.eventType.ScreeningEvent }, (typeof params.day === 'string' && params.day.length > 0)
                 ? {
                     startFrom: moment(`${params.day}T00:00:00+09:00`, 'YYYYMMDDTHH:mm:ssZ')
                         .toDate(),
@@ -67,7 +67,7 @@ function searchByChevre(params, clientId) {
             });
             unitPriceOffers = offers.map((o) => {
                 // tslint:disable-next-line:max-line-length
-                const unitPriceSpec = o.priceSpecification.priceComponent.find((p) => p.typeOf === cinerinoapi.factory.chevre.priceSpecificationType.UnitPriceSpecification);
+                const unitPriceSpec = o.priceSpecification.priceComponent.find((p) => p.typeOf === cinerinoapi.factory.priceSpecificationType.UnitPriceSpecification);
                 return Object.assign(Object.assign({}, o), { priceSpecification: unitPriceSpec });
             });
         }
@@ -105,7 +105,7 @@ function event2event4pos(params) {
                 .tz('Asia/Tokyo')
                 .format('HHmm'), end_time: moment(event.endDate)
                 .tz('Asia/Tokyo')
-                .format('HHmm'), online_sales_status: (event.eventStatus === cinerinoapi.factory.chevre.eventStatusType.EventScheduled)
+                .format('HHmm'), online_sales_status: (event.eventStatus === cinerinoapi.factory.eventStatusType.EventScheduled)
                 ? 'Normal'
                 : 'Suspended' }, (params.excludeTicketTypes)
             ? undefined

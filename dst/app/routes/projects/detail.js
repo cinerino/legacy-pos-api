@@ -8,6 +8,7 @@ const express = require("express");
 const events_1 = require("../events");
 const movie_1 = require("../movie");
 const performances_1 = require("../performances");
+const places_1 = require("../places");
 const placeOrder_1 = require("../transactions/placeOrder");
 const returnOrder_1 = require("../transactions/returnOrder");
 const projectDetailRouter = express.Router();
@@ -23,6 +24,7 @@ projectDetailRouter.use((req, _, next) => {
 projectDetailRouter.use('/creativeWorks/movie', movie_1.default);
 projectDetailRouter.use('/events', events_1.default);
 projectDetailRouter.use('/performances', performances_1.default);
+projectDetailRouter.use('/places', places_1.default);
 projectDetailRouter.use('/transactions/placeOrder', placeOrder_1.default);
 projectDetailRouter.use('/transactions/returnOrder', returnOrder_1.default);
 exports.default = projectDetailRouter;

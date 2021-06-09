@@ -10,7 +10,7 @@ import rateLimit from '../middlewares/rateLimit';
 import validator from '../middlewares/validator';
 
 export interface IMovie4pos {
-    additionalProperty?: cinerinoapi.factory.chevre.propertyValue.IPropertyValue<string>[];
+    additionalProperty?: cinerinoapi.factory.propertyValue.IPropertyValue<string>[];
     identifier?: string;
     datePublished?: Date;
     name?: { ja?: string; en?: string };
@@ -65,7 +65,7 @@ movieRouter.get(
 
             const params = <ISearchConditions4pos>req.query;
 
-            const searchConditions: cinerinoapi.factory.chevre.creativeWork.movie.ISearchConditions = {
+            const searchConditions: cinerinoapi.factory.creativeWork.movie.ISearchConditions = {
                 // tslint:disable-next-line:no-magic-numbers
                 limit: (typeof params.limit === 'number') ? Math.min(params.limit, 100) : 100,
                 page: (typeof params.page === 'number') ? Math.max(params.page, 1) : 1,
@@ -93,7 +93,7 @@ movieRouter.get(
 
 export default movieRouter;
 
-function movie2movie4pos(movie: cinerinoapi.factory.chevre.creativeWork.movie.ICreativeWork): IMovie4pos {
+function movie2movie4pos(movie: cinerinoapi.factory.creativeWork.movie.ICreativeWork): IMovie4pos {
     return {
         additionalProperty: (Array.isArray(movie.additionalProperty)) ? movie.additionalProperty : [],
         ...(typeof movie.contentRating === 'string') ? { contentRating: movie.contentRating } : undefined,

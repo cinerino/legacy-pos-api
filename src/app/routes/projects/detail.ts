@@ -7,6 +7,7 @@ import * as express from 'express';
 import eventsRouter from '../events';
 import movieRouter from '../movie';
 import performancesRouter from '../performances';
+import placesRouter from '../places';
 import placeOrderTransactionsRouter from '../transactions/placeOrder';
 import returnOrderTransactionsRouter from '../transactions/returnOrder';
 
@@ -26,6 +27,7 @@ projectDetailRouter.use((req, _, next) => {
 projectDetailRouter.use('/creativeWorks/movie', movieRouter);
 projectDetailRouter.use('/events', eventsRouter);
 projectDetailRouter.use('/performances', performancesRouter);
+projectDetailRouter.use('/places', placesRouter);
 projectDetailRouter.use('/transactions/placeOrder', placeOrderTransactionsRouter);
 projectDetailRouter.use('/transactions/returnOrder', returnOrderTransactionsRouter);
 

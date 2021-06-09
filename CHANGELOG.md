@@ -18,6 +18,16 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Security
 
+## v1.12.0 - 2021-06-09
+
+### Added
+
+- 施設検索を追加
+
+### Changed
+
+- update @cinerino/sdk
+
 ## v1.11.0 - 2021-05-15
 
 ### Added

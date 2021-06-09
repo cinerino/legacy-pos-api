@@ -8,7 +8,7 @@ declare global {
         // tslint:disable-next-line:interface-name
         export interface Request {
             project: cinerinoapi.factory.project.IProject;
-            user: cinerinoapi.factory.chevre.clientUser.IClientUser;
+            user: cinerinoapi.factory.clientUser.IClientUser;
             authClient?: cinerinoapi.auth.ClientCredentials;
         }
     }

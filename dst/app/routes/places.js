@@ -10,20 +10,20 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 /**
- * 施設コンテンツルーター
+ * 施設ルーター
  */
 const cinerinoapi = require("@cinerino/sdk");
 const express = require("express");
 const express_validator_1 = require("express-validator");
-const permitScopes_1 = require("../../middlewares/permitScopes");
-const rateLimit_1 = require("../../middlewares/rateLimit");
-const validator_1 = require("../../middlewares/validator");
-const screeningEventSeriesRouter = express.Router();
-screeningEventSeriesRouter.use(rateLimit_1.default);
+const permitScopes_1 = require("../middlewares/permitScopes");
+const rateLimit_1 = require("../middlewares/rateLimit");
+const validator_1 = require("../middlewares/validator");
+const placesRouter = express.Router();
+placesRouter.use(rateLimit_1.default);
 /**
- * イベント検索
+ * 施設検索
  */
-screeningEventSeriesRouter.get('', permitScopes_1.default([]), ...[
+placesRouter.get(`/${cinerinoapi.factory.placeType.MovieTheater}`, permitScopes_1.default([]), ...[
     express_validator_1.query('limit')
         .optional()
         .isInt()
@@ -34,7 +34,7 @@ screeningEventSeriesRouter.get('', permitScopes_1.default([]), ...[
         .toInt()
 ], ...[], validator_1.default, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const eventService = new cinerinoapi.service.Event({
+        const placeService = new cinerinoapi.service.Place({
             endpoint: process.env.CINERINO_API_ENDPOINT,
             project: { id: req.project.id },
             auth: req.authClient
@@ -44,20 +44,21 @@ screeningEventSeriesRouter.get('', permitScopes_1.default([]), ...[
             // tslint:disable-next-line:no-magic-numbers
             limit: (typeof params.limit === 'number') ? Math.min(params.limit, 100) : 100,
             page: (typeof params.page === 'number') ? Math.max(params.page, 1) : 1,
-            sort: { startDate: 1 },
-            typeOf: cinerinoapi.factory.eventType.ScreeningEventSeries
+            sort: { branchCode: 1 }
         };
-        const searchResult = yield eventService.search(searchConditions);
-        res.json(searchResult.data.map(event2event4pos));
+        const searchResult = yield placeService.searchMovieTheaters(searchConditions);
+        res.json(searchResult.data.map(movieTheater2movieTheater4pos));
     }
     catch (error) {
         next(error);
     }
 }));
-exports.default = screeningEventSeriesRouter;
-function event2event4pos(event) {
+exports.default = placesRouter;
+function movieTheater2movieTheater4pos(movieTheater) {
+    var _a, _b;
     return {
-        additionalProperty: (Array.isArray(event.additionalProperty)) ? event.additionalProperty : [],
-        id: event.id
+        additionalProperty: (Array.isArray(movieTheater.additionalProperty)) ? movieTheater.additionalProperty : [],
+        branchCode: movieTheater.branchCode,
+        name: Object.assign(Object.assign({}, (typeof ((_a = movieTheater.name) === null || _a === void 0 ? void 0 : _a.en) === 'string') ? { en: movieTheater.name.en } : undefined), (typeof ((_b = movieTheater.name) === null || _b === void 0 ? void 0 : _b.ja) === 'string') ? { ja: movieTheater.name.ja } : undefined)
     };
 }

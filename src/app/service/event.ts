@@ -35,22 +35,22 @@ export interface ISearchConditions4pos {
 
 export function searchByChevre(params: ISearchConditions4pos, clientId: string) {
     return async (eventService: cinerinoapi.service.Event): Promise<IEvent4pos[]> => {
-        let events: cinerinoapi.factory.chevre.event.screeningEvent.IEvent[];
+        let events: cinerinoapi.factory.event.screeningEvent.IEvent[];
 
         let excludeTicketTypes = true;
 
         // performanceId指定の場合はこちら
         if (typeof params.performanceId === 'string') {
-            const event = await eventService.findById<cinerinoapi.factory.chevre.eventType.ScreeningEvent>({ id: params.performanceId });
+            const event = await eventService.findById<cinerinoapi.factory.eventType.ScreeningEvent>({ id: params.performanceId });
             events = [event];
             excludeTicketTypes = false;
         } else {
-            const searchConditions: cinerinoapi.factory.chevre.event.screeningEvent.ISearchConditions = {
+            const searchConditions: cinerinoapi.factory.event.screeningEvent.ISearchConditions = {
                 // tslint:disable-next-line:no-magic-numbers
                 limit: (params.limit !== undefined) ? Math.min(Number(params.limit), 100) : 100,
                 page: (params.page !== undefined) ? Math.max(Number(params.page), 1) : 1,
                 sort: { startDate: 1 },
-                typeOf: cinerinoapi.factory.chevre.eventType.ScreeningEvent,
+                typeOf: cinerinoapi.factory.eventType.ScreeningEvent,
                 ...(typeof params.day === 'string' && params.day.length > 0)
                     ? {
                         startFrom: moment(`${params.day}T00:00:00+09:00`, 'YYYYMMDDTHH:mm:ssZ')
@@ -84,14 +84,14 @@ export function searchByChevre(params: ISearchConditions4pos, clientId: string) 
 
         const firstEvent = events[0];
 
-        let unitPriceOffers: cinerinoapi.factory.chevre.offer.IUnitPriceOffer[] = [];
+        let unitPriceOffers: cinerinoapi.factory.offer.IUnitPriceOffer[] = [];
 
         // オファーリスト除外でなければ、オファー検索
         if (!excludeTicketTypes) {
             const offers = await eventService.searchTicketOffers({
                 event: { id: firstEvent.id },
                 seller: {
-                    typeOf: <cinerinoapi.factory.chevre.organizationType>firstEvent.offers?.seller?.typeOf,
+                    typeOf: <cinerinoapi.factory.organizationType>firstEvent.offers?.seller?.typeOf,
                     id: <string>firstEvent.offers?.seller?.id
                 },
                 store: {
@@ -101,9 +101,9 @@ export function searchByChevre(params: ISearchConditions4pos, clientId: string) 
 
             unitPriceOffers = offers.map((o) => {
                 // tslint:disable-next-line:max-line-length
-                const unitPriceSpec = <cinerinoapi.factory.chevre.priceSpecification.IPriceSpecification<cinerinoapi.factory.chevre.priceSpecificationType.UnitPriceSpecification>>
+                const unitPriceSpec = <cinerinoapi.factory.priceSpecification.IPriceSpecification<cinerinoapi.factory.priceSpecificationType.UnitPriceSpecification>>
                     o.priceSpecification.priceComponent.find(
-                        (p) => p.typeOf === cinerinoapi.factory.chevre.priceSpecificationType.UnitPriceSpecification
+                        (p) => p.typeOf === cinerinoapi.factory.priceSpecificationType.UnitPriceSpecification
                     );
 
                 return {
@@ -121,8 +121,8 @@ export function searchByChevre(params: ISearchConditions4pos, clientId: string) 
 }
 
 function event2event4pos(params: {
-    event: cinerinoapi.factory.chevre.event.screeningEvent.IEvent;
-    unitPriceOffers: cinerinoapi.factory.chevre.offer.IUnitPriceOffer[];
+    event: cinerinoapi.factory.event.screeningEvent.IEvent;
+    unitPriceOffers: cinerinoapi.factory.offer.IUnitPriceOffer[];
     excludeTicketTypes: boolean;
 }): IEvent4pos {
     const event = params.event;
@@ -163,7 +163,7 @@ function event2event4pos(params: {
             end_time: moment(event.endDate)
                 .tz('Asia/Tokyo')
                 .format('HHmm'),
-            online_sales_status: (event.eventStatus === cinerinoapi.factory.chevre.eventStatusType.EventScheduled)
+            online_sales_status: (event.eventStatus === cinerinoapi.factory.eventStatusType.EventScheduled)
                 ? 'Normal'
                 : 'Suspended',
             ...(params.excludeTicketTypes)
@@ -175,8 +175,8 @@ function event2event4pos(params: {
 
                         return {
                             name: {
-                                en: (<cinerinoapi.factory.chevre.multilingualString>unitPriceOffer.name).en,
-                                ja: (<cinerinoapi.factory.chevre.multilingualString>unitPriceOffer.name).ja
+                                en: (<cinerinoapi.factory.multilingualString>unitPriceOffer.name).en,
+                                ja: (<cinerinoapi.factory.multilingualString>unitPriceOffer.name).ja
                             },
                             id: String(unitPriceOffer.identifier), // POSに受け渡すのは券種IDでなく券種コードなので要注意
                             charge: unitPriceOffer.priceSpecification?.price,

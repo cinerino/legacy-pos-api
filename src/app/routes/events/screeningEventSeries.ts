@@ -10,7 +10,7 @@ import rateLimit from '../../middlewares/rateLimit';
 import validator from '../../middlewares/validator';
 
 export interface IEvent4pos {
-    additionalProperty?: cinerinoapi.factory.chevre.propertyValue.IPropertyValue<string>[];
+    additionalProperty?: cinerinoapi.factory.propertyValue.IPropertyValue<string>[];
     id: string;
 }
 
@@ -51,12 +51,12 @@ screeningEventSeriesRouter.get(
 
             const params = <ISearchConditions4pos>req.query;
 
-            const searchConditions: cinerinoapi.factory.chevre.event.screeningEventSeries.ISearchConditions = {
+            const searchConditions: cinerinoapi.factory.event.screeningEventSeries.ISearchConditions = {
                 // tslint:disable-next-line:no-magic-numbers
                 limit: (typeof params.limit === 'number') ? Math.min(params.limit, 100) : 100,
                 page: (typeof params.page === 'number') ? Math.max(params.page, 1) : 1,
                 sort: { startDate: 1 },
-                typeOf: cinerinoapi.factory.chevre.eventType.ScreeningEventSeries
+                typeOf: cinerinoapi.factory.eventType.ScreeningEventSeries
             };
 
             const searchResult = await eventService.search(searchConditions);
@@ -70,7 +70,7 @@ screeningEventSeriesRouter.get(
 
 export default screeningEventSeriesRouter;
 
-function event2event4pos(event: cinerinoapi.factory.chevre.event.screeningEventSeries.IEvent): IEvent4pos {
+function event2event4pos(event: cinerinoapi.factory.event.screeningEventSeries.IEvent): IEvent4pos {
     return {
         additionalProperty: (Array.isArray(event.additionalProperty)) ? event.additionalProperty : [],
         id: event.id

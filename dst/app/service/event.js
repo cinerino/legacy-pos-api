@@ -85,7 +85,7 @@ function event2event4pos(params) {
     let seatStatus = event.remainingAttendeeCapacity;
     // 一般座席の残席数
     // aggregateOfferのcategoryで判定する
-    const normalOfferRemainingAttendeeCapacity = (_c = (_b = (_a = event.aggregateOffer) === null || _a === void 0 ? void 0 : _a.offers) === null || _b === void 0 ? void 0 : _b.find((o) => { var _a; return ((_a = o.category) === null || _a === void 0 ? void 0 : _a.codeValue) === 'Normal'; })) === null || _c === void 0 ? void 0 : _c.remainingAttendeeCapacity;
+    const normalOfferRemainingAttendeeCapacity = (_c = (_b = (_a = event.aggregateOffer) === null || _a === void 0 ? void 0 : _a.offers) === null || _b === void 0 ? void 0 : _b.find((o) => { var _a, _b; return ((_a = o.category) === null || _a === void 0 ? void 0 : _a.codeValue) === 'Normal' || ((_b = o.category) === null || _b === void 0 ? void 0 : _b.codeValue) === 'NormalOffer'; })) === null || _c === void 0 ? void 0 : _c.remainingAttendeeCapacity;
     if (typeof normalOfferRemainingAttendeeCapacity === 'number') {
         seatStatus = normalOfferRemainingAttendeeCapacity;
     }

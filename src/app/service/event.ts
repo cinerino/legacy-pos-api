@@ -133,7 +133,9 @@ function event2event4pos(params: {
     // 一般座席の残席数
     // aggregateOfferのcategoryで判定する
     const normalOfferRemainingAttendeeCapacity =
-        event.aggregateOffer?.offers?.find((o) => o.category?.codeValue === 'Normal')?.remainingAttendeeCapacity;
+        event.aggregateOffer?.offers?.find(
+            (o) => o.category?.codeValue === 'Normal' || o.category?.codeValue === 'NormalOffer'
+        )?.remainingAttendeeCapacity;
     if (typeof normalOfferRemainingAttendeeCapacity === 'number') {
         seatStatus = normalOfferRemainingAttendeeCapacity;
     }

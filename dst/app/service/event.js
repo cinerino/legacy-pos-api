@@ -83,9 +83,6 @@ function event2event4pos(params) {
     const event = params.event;
     // デフォルトはイベントのremainingAttendeeCapacity
     let seatStatus = event.remainingAttendeeCapacity;
-    // const normalOffer = unitPriceOffers.find((o) => o.additionalProperty?.find((p) => p.name === 'category')?.value === 'Normal');
-    // const wheelchairOffer =
-    //     unitPriceOffers.find((o) => o.additionalProperty?.find((p) => p.name === 'category')?.value === 'Wheelchair');
     // 一般座席の残席数
     // aggregateOfferのcategoryで判定する
     const normalOfferRemainingAttendeeCapacity = (_c = (_b = (_a = event.aggregateOffer) === null || _a === void 0 ? void 0 : _a.offers) === null || _b === void 0 ? void 0 : _b.find((o) => { var _a; return ((_a = o.category) === null || _a === void 0 ? void 0 : _a.codeValue) === 'Normal'; })) === null || _c === void 0 ? void 0 : _c.remainingAttendeeCapacity;
@@ -93,7 +90,7 @@ function event2event4pos(params) {
         seatStatus = normalOfferRemainingAttendeeCapacity;
     }
     // 車椅子座席の残席数
-    const wheelchairAvailable = (_f = (_e = (_d = event.aggregateOffer) === null || _d === void 0 ? void 0 : _d.offers) === null || _e === void 0 ? void 0 : _e.find((o) => { var _a; return ((_a = o.category) === null || _a === void 0 ? void 0 : _a.codeValue) === 'Wheelchair'; })) === null || _f === void 0 ? void 0 : _f.remainingAttendeeCapacity;
+    const wheelchairAvailable = (_f = (_e = (_d = event.aggregateOffer) === null || _d === void 0 ? void 0 : _d.offers) === null || _e === void 0 ? void 0 : _e.find((o) => { var _a, _b; return ((_a = o.category) === null || _a === void 0 ? void 0 : _a.codeValue) === 'Wheelchair' || ((_b = o.category) === null || _b === void 0 ? void 0 : _b.codeValue) === 'WheelchairOffer'; })) === null || _f === void 0 ? void 0 : _f.remainingAttendeeCapacity;
     const tourNumber = (_h = (_g = event.additionalProperty) === null || _g === void 0 ? void 0 : _g.find((p) => p.name === 'tourNumber')) === null || _h === void 0 ? void 0 : _h.value;
     return {
         id: event.id,

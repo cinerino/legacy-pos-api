@@ -130,10 +130,6 @@ function event2event4pos(params: {
     // デフォルトはイベントのremainingAttendeeCapacity
     let seatStatus = event.remainingAttendeeCapacity;
 
-    // const normalOffer = unitPriceOffers.find((o) => o.additionalProperty?.find((p) => p.name === 'category')?.value === 'Normal');
-    // const wheelchairOffer =
-    //     unitPriceOffers.find((o) => o.additionalProperty?.find((p) => p.name === 'category')?.value === 'Wheelchair');
-
     // 一般座席の残席数
     // aggregateOfferのcategoryで判定する
     const normalOfferRemainingAttendeeCapacity =
@@ -144,7 +140,9 @@ function event2event4pos(params: {
 
     // 車椅子座席の残席数
     const wheelchairAvailable =
-        event.aggregateOffer?.offers?.find((o) => o.category?.codeValue === 'Wheelchair')?.remainingAttendeeCapacity;
+        event.aggregateOffer?.offers?.find(
+            (o) => o.category?.codeValue === 'Wheelchair' || o.category?.codeValue === 'WheelchairOffer'
+        )?.remainingAttendeeCapacity;
 
     const tourNumber = event.additionalProperty?.find((p) => p.name === 'tourNumber')?.value;
 

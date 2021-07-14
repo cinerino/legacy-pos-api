@@ -9,7 +9,7 @@
     }
   ],
   "dependencies": {
-    "@cinerino/sdk": "3.6.0",
+    "@cinerino/sdk": "3.10.3",
     "@motionpicture/express-middleware": "^0.1.1",
     "body-parser": "^1.18.2",
     "cors": "^2.8.4",
